@@ -25,7 +25,7 @@
 
   @page {
     size: A4 portrait;
-    margin: 12mm 14mm 10mm 14mm;
+    margin: 15mm;
   }
 
   body {
@@ -147,6 +147,11 @@
   }
   .ps-expense-table tbody td {
     font-size: 9pt;
+  }
+  .ps-expense-table tbody tr,
+  .ps-expense-table tfoot tr,
+  .ps-info-table tr {
+    break-inside: avoid;
   }
   .ps-expense-table tbody td.center { text-align: center; }
   .ps-expense-table tbody td.right { text-align: right; }
