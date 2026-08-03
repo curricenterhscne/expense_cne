@@ -105,6 +105,9 @@ var App = {
       seqEl.textContent = '접수번호: ' + res.seq;
       seqEl.style.display = 'inline-block';
     }
+
+    // 인쇄용 데이터 저장
+    Print.save(payload, res.seq);
   },
 
   /** 처음으로 돌아가기 */

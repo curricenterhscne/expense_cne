@@ -205,11 +205,98 @@
       <div class="result-sub" id="resultSub"></div>
       <div class="result-seq" id="resultSeq"></div>
       <div class="result-actions">
+        <button class="btn-secondary" id="btnPrint" onclick="Print.run()">🖨 신청서 인쇄(PDF)</button>
         <button class="btn-secondary" onclick="App.reset()">다시 작성하기</button>
       </div>
     </div>
   </div>
 </div>
+
+<!-- ===== 인쇄 영역 (화면에서는 숨김, @media print에서만 노출) ===== -->
+<section id="printSheet" class="print-sheet">
+  <div class="ps-header">
+    <div class="ps-header-top">
+      <div class="ps-badge" id="psBadge"></div>
+      <div class="ps-header-right">
+        <span class="ps-date" id="psDate"></span>
+        <span class="ps-seq" id="psSeq"></span>
+      </div>
+    </div>
+    <div class="ps-title">수업운영비 신청서</div>
+    <div class="ps-school" id="psSchool"></div>
+  </div>
+
+  <div class="ps-section">
+    <div class="ps-section-title">① 강좌 정보</div>
+    <table class="ps-table ps-info-table">
+      <tr>
+        <th>강좌코드</th><td id="ps-courseCode"></td>
+        <th>과목명</th><td id="ps-subject"></td>
+      </tr>
+      <tr>
+        <th>담당교사</th><td id="ps-teacher"></td>
+        <th>소속학교</th><td id="ps-school2"></td>
+      </tr>
+      <tr>
+        <th>전공</th><td id="ps-major"></td>
+        <th>수업요일</th><td id="ps-day"></td>
+      </tr>
+      <tr>
+        <th>수강인원</th><td id="ps-students"></td>
+        <th>연락처</th><td id="ps-contact"></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="ps-section">
+    <div class="ps-section-title">② 수업운영비 신청</div>
+    <table class="ps-table">
+      <tr>
+        <th style="width:110px;">희망 여부</th>
+        <td id="ps-wants"></td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="ps-section" id="psExpenseSection" style="display:none;">
+    <div class="ps-section-title">③ 운영 소요예산 내역</div>
+    <table class="ps-table ps-expense-table">
+      <thead>
+        <tr>
+          <th style="width:40px;">번호</th>
+          <th style="width:160px;">구분</th>
+          <th>산출식</th>
+          <th style="width:110px;">금액(원)</th>
+        </tr>
+      </thead>
+      <tbody id="psExpenseBody"></tbody>
+      <tfoot>
+        <tr class="ps-total-row">
+          <td colspan="3">총 소요예산</td>
+          <td id="psTotalAmount"></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <div class="ps-section" id="psNoteSection" style="display:none;">
+    <div class="ps-section-title" id="psNoteTitle">④ 비고</div>
+    <div class="ps-note-box" id="psNoteContent"></div>
+  </div>
+
+  <div class="ps-reference">
+    <div class="ps-ref-title">※ 참고사항</div>
+    <ul id="psRefList">
+      <li>운영 소요예산 작성 시 천원 단위에 맞춰 작성 (백원 이하 절사)</li>
+      <li id="psRefLimit">운영비는 수업 교사(강사) 소속교로 교부</li>
+      <li>학생 간식비: 운영비에서 1인당 1회 6,000원 이내 사용 가능</li>
+      <li>실험실습 재료·키트 등 한도 초과 필요 시: 담당 장학사 041-640-7221</li>
+      <li>학생지원물품, 실험실습형 수업재료 구입 이외의 사항은 집행 불가 (추후 환수)</li>
+    </ul>
+  </div>
+
+  <div class="ps-footer" id="psFooter"></div>
+</section>
 
 <script src="js/config.js"></script>
 <script src="js/api.js"></script>

@@ -1,1 +1,219 @@
 /* 인쇄(PDF) 전용 스타일시트 — @media print 규칙 */
+
+/* ===== 화면에서는 인쇄 영역 숨김 ===== */
+.print-sheet { display: none; }
+
+/* ===== 인쇄 시 규칙 ===== */
+@media print {
+  /* 화면 요소 전부 숨김 */
+  body > *:not(.print-sheet) { display: none !important; }
+
+  /* 인쇄 영역만 표시 */
+  .print-sheet {
+    display: block !important;
+    width: 210mm;
+    min-height: 297mm;
+    margin: 0;
+    padding: 0;
+    font-family: 'Batang', '바탕', Georgia, serif;
+    font-size: 10pt;
+    color: #1a1a2e;
+    background: #fff;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 12mm 14mm 10mm 14mm;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    background: #fff !important;
+    background-image: none !important;
+  }
+
+  /* ===== 헤더 ===== */
+  .ps-header {
+    background: #0d2444;
+    padding: 18px 22px 16px;
+    border-bottom: 4px solid #c9a84c;
+    margin-bottom: 0;
+    position: relative;
+  }
+  .ps-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .ps-badge {
+    display: inline-block;
+    background: #c9a84c;
+    color: #0d2444;
+    font-size: 9pt;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    padding: 3px 10px;
+    border-radius: 2px;
+    font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+  }
+  .ps-header-right {
+    font-size: 8.5pt;
+    color: #e8c96a;
+    font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+  }
+  .ps-header-right .ps-seq {
+    margin-left: 16px;
+    font-weight: 700;
+  }
+  .ps-title {
+    font-size: 18pt;
+    font-weight: 700;
+    color: #fff;
+    text-align: center;
+    letter-spacing: 0.08em;
+  }
+  .ps-school {
+    text-align: center;
+    font-size: 8.5pt;
+    color: rgba(255,255,255,0.55);
+    margin-top: 8px;
+    font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+  }
+
+  /* ===== 섹션 공통 ===== */
+  .ps-section { margin-top: 14px; }
+  .ps-section-title {
+    background: #1a3a5c;
+    color: #fff;
+    font-size: 9.5pt;
+    font-weight: 700;
+    padding: 6px 14px;
+    font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+  }
+
+  /* ===== 테이블 공통 ===== */
+  .ps-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 9.5pt;
+  }
+  .ps-table th, .ps-table td {
+    border: 1px solid #d4c9b0;
+    padding: 5px 10px;
+    vertical-align: middle;
+  }
+  .ps-table th {
+    background: #f5f2ec;
+    color: #6b6b80;
+    font-weight: 600;
+    text-align: left;
+    width: 90px;
+    font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+    font-size: 8.5pt;
+  }
+  .ps-table td {
+    background: #fff;
+    color: #1a1a2e;
+  }
+
+  /* 강좌 정보 테이블: 2열 레이아웃 */
+  .ps-info-table th { width: 80px; }
+  .ps-info-table td { width: calc(50% - 80px); }
+
+  /* 희망 여부 강조 */
+  .ps-wants-yes {
+    color: #1e5fa8;
+    font-weight: 700;
+    font-size: 10pt;
+  }
+  .ps-wants-no {
+    color: #6b6b80;
+    font-weight: 600;
+    font-size: 10pt;
+  }
+
+  /* ===== 소요예산 테이블 ===== */
+  .ps-expense-table thead th {
+    background: #e8e0d0;
+    color: #1a3a5c;
+    font-weight: 700;
+    text-align: center;
+    width: auto;
+    font-size: 8.5pt;
+  }
+  .ps-expense-table tbody td {
+    font-size: 9pt;
+  }
+  .ps-expense-table tbody td.center { text-align: center; }
+  .ps-expense-table tbody td.right { text-align: right; }
+  .ps-expense-table tbody td.bold { font-weight: 700; }
+  .ps-expense-table tbody tr:nth-child(even) td { background: #f5f2ec; }
+
+  /* 합계 행 */
+  .ps-total-row td {
+    background: #0d2444 !important;
+    color: #fff;
+    font-weight: 700;
+    font-size: 10pt;
+    padding: 7px 10px;
+    border-color: #0d2444;
+  }
+  .ps-total-row td:last-child {
+    text-align: right;
+    color: #e8c96a;
+    font-size: 11pt;
+  }
+
+  /* ===== 비고 ===== */
+  .ps-note-box {
+    border: 1px solid #d4c9b0;
+    padding: 8px 12px;
+    min-height: 36px;
+    font-size: 9pt;
+    line-height: 1.6;
+    background: #fff;
+  }
+
+  /* ===== 참고사항 ===== */
+  .ps-reference {
+    margin-top: 16px;
+    background: #f5f2ec;
+    border-left: 4px solid #c9a84c;
+    padding: 10px 14px;
+  }
+  .ps-ref-title {
+    font-size: 9pt;
+    font-weight: 700;
+    color: #1a3a5c;
+    margin-bottom: 6px;
+    font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+  }
+  .ps-reference ul {
+    list-style: none;
+    font-size: 7.5pt;
+    color: #6b6b80;
+    line-height: 1.8;
+    padding: 0;
+    margin: 0;
+  }
+  .ps-reference ul li::before {
+    content: '▶ ';
+    color: #c9a84c;
+    font-size: 7pt;
+  }
+
+  /* ===== 푸터 ===== */
+  .ps-footer {
+    margin-top: 16px;
+    background: #0d2444;
+    padding: 6px 14px;
+    font-size: 7pt;
+    color: rgba(255,255,255,0.5);
+    text-align: center;
+    font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+  }
+}
