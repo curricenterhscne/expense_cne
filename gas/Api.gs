@@ -13,8 +13,7 @@ function doGet(e) {
         return jsonResponse({ success: true, data: getPublicConfig() });
 
       case 'courses':
-        // Phase 2에서 구현
-        return jsonResponse({ success: false, error: '강좌 목록 조회는 아직 구현되지 않았습니다.' });
+        return jsonResponse({ success: true, courses: getCourses() });
 
       default:
         return jsonResponse({ success: true, message: '수업운영비 신청 서버 정상 작동 중' });
@@ -39,8 +38,8 @@ function doPost(e) {
         return jsonResponse({ success: false, error: '인증 기능은 아직 구현되지 않았습니다.' });
 
       case 'submit':
-        // Phase 4에서 구현
-        return jsonResponse({ success: false, error: '제출 기능은 아직 구현되지 않았습니다.' });
+        // TODO: Phase 3에서 인증 토큰 검증 추가
+        return jsonResponse(submitApplication(body));
 
       default:
         return jsonResponse({ success: false, error: '알 수 없는 action: ' + action });
