@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수업운영비 신청서 작성 안내 (교사용)</title>
+<style>
+  @page { size: A4; margin: 15mm; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+    font-size: 13px; line-height: 1.8; color: #1a1a2e;
+    max-width: 700px; margin: 0 auto; padding: 20px;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* 헤더 */
+  .header {
+    background: #0d2444; color: #fff; padding: 20px 24px;
+    border-bottom: 4px solid #c9a84c; margin-bottom: 24px;
+  }
+  .header h1 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .header p { font-size: 12px; color: rgba(255,255,255,0.6); }
+
+  /* 섹션 */
+  h2 {
+    background: #1a3a5c; color: #fff; font-size: 13px;
+    padding: 6px 14px; margin: 20px 0 12px; font-weight: 700;
+  }
+  h3 { font-size: 13px; font-weight: 700; color: #1a3a5c; margin: 14px 0 6px; }
+
+  /* 단계 */
+  .steps { counter-reset: step; padding-left: 0; list-style: none; }
+  .steps li {
+    counter-increment: step; position: relative;
+    padding: 8px 0 8px 36px; border-bottom: 1px solid #e8e0d0;
+  }
+  .steps li::before {
+    content: counter(step);
+    position: absolute; left: 0; top: 8px;
+    width: 24px; height: 24px; background: #c9a84c; color: #0d2444;
+    border-radius: 50%; font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .steps li:last-child { border-bottom: none; }
+  .steps li strong { color: #1e5fa8; }
+
+  /* 안내 박스 */
+  .tip {
+    background: #f5f2ec; border-left: 4px solid #c9a84c;
+    padding: 10px 14px; margin: 10px 0; font-size: 12px;
+  }
+  .warn {
+    background: rgba(192,57,43,0.06); border-left: 4px solid #c0392b;
+    padding: 10px 14px; margin: 10px 0; font-size: 12px; color: #7a2520;
+  }
+  .warn strong { color: #c0392b; }
+
+  /* FAQ */
+  .faq { margin: 8px 0; }
+  .faq dt {
+    font-weight: 700; color: #0d2444; font-size: 13px;
+    padding: 6px 0 2px; border-bottom: 1px dashed #d4c9b0;
+  }
+  .faq dt::before { content: 'Q. '; color: #c9a84c; font-weight: 700; }
+  .faq dd { padding: 6px 0 10px 20px; font-size: 12.5px; color: #444; }
+  .faq dd::before { content: 'A. '; color: #1e5fa8; font-weight: 700; }
+
+  /* 푸터 */
+  .footer {
+    margin-top: 24px; padding: 10px 14px;
+    background: #0d2444; color: rgba(255,255,255,0.5);
+    font-size: 11px; text-align: center;
+  }
+
+  @media print {
+    body { padding: 0; }
+    .header { break-after: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>수업운영비 신청서 작성 안내</h1>
+  <p>참학력 온라인 공동교육과정 · 수업 지도교사용</p>
+</div>
+
+<h2>신청 절차</h2>
+
+<ol class="steps">
+  <li>
+    담당자가 안내한 <strong>신청 링크</strong>에 접속합니다.
+    <div class="tip">Chrome 또는 Edge 브라우저를 권장합니다.</div>
+  </li>
+  <li>
+    <strong>강좌를 선택</strong>합니다.
+    드롭다운에서 본인의 강좌코드를 찾아 선택하면 과목명·소속교·수강인원 등이 표시됩니다.
+    <div class="tip">이미 제출한 강좌는 목록에 ✓ 표시가 됩니다. 다시 선택하면 수정 제출할 수 있습니다.</div>
+  </li>
+  <li>
+    <strong>연락처 뒤 4자리</strong>를 입력하고 [확인] 버튼을 누릅니다.
+    강좌목록에 등록된 교사 연락처의 뒤 4자리와 일치해야 합니다.
+  </li>
+  <li>
+    <strong>운영비 희망 여부</strong>를 선택합니다.
+    <ul style="list-style:disc;padding-left:20px;margin-top:4px;">
+      <li>"희망합니다" → 소요예산 항목을 입력합니다.</li>
+      <li>"희망하지 않습니다" → 항목 없이 바로 제출 가능합니다.</li>
+    </ul>
+  </li>
+  <li>
+    <strong>소요예산 항목</strong>을 입력합니다 (최대 10개).
+    각 항목에 구분(예: 도서, 간식, 수업용품), 산출식, 금액을 적습니다.
+    <div class="warn">
+      <strong>천원 단위</strong>로 작성하세요 (백원 이하 절사).<br>
+      지원 한도는 <strong>수강인원 × 인당 단가</strong>이며, 강좌 선택 시 자동 계산됩니다.
+    </div>
+  </li>
+  <li>
+    내용을 확인한 뒤 <strong>[신청서 제출하기]</strong> 버튼을 누릅니다.
+    확인 대화상자에서 내용을 검토하고 [확인]을 누르면 제출됩니다.
+  </li>
+  <li>
+    완료 화면에서 <strong>[신청서 PDF 저장]</strong> 버튼을 눌러 PDF를 저장합니다.
+    <div class="tip">
+      인쇄 대화상자가 열리면 <strong>대상(Destination)</strong>을
+      <strong>'PDF로 저장'</strong>으로 선택하고 [저장]을 누르세요.
+      파일명은 자동으로 「학기코드_수업운영비신청서_강좌코드_교사명」 형태로 설정됩니다.
+    </div>
+  </li>
+  <li>
+    저장한 PDF를 <strong>공문에 첨부</strong>하여 별도 제출합니다.
+    <div class="warn">온라인 제출과 공문 제출이 <strong>모두</strong> 완료되어야 접수 처리됩니다.</div>
+  </li>
+</ol>
+
+<h2>자주 묻는 질문</h2>
+
+<dl class="faq">
+  <dt>잘못 제출했는데 어떻게 수정하나요?</dt>
+  <dd>같은 강좌로 다시 접속하여 수정 제출하면 됩니다.
+    기존 내용이 자동으로 불러와지고, 제출하면 이전 신청을 대체합니다.
+    접수번호는 변경되지 않습니다.</dd>
+
+  <dt>연락처 뒤 4자리가 맞지 않다고 나옵니다.</dt>
+  <dd>강좌목록에 등록된 연락처와 다를 수 있습니다.
+    5회 실패하면 10분간 잠기니, 맞지 않으면 담당 장학사(☎ 041-640-7221)에게
+    등록된 연락처를 확인해 주세요.</dd>
+
+  <dt>PDF 저장 버튼을 눌렀는데 인쇄가 되어 버립니다.</dt>
+  <dd>인쇄 대화상자에서 대상이 프린터로 되어 있으면 종이로 출력됩니다.
+    대상을 <strong>'PDF로 저장'</strong> (Chrome) 또는
+    <strong>'Microsoft Print to PDF'</strong> (Edge)로 변경해 주세요.</dd>
+
+  <dt>운영비를 신청하지 않아도 제출해야 하나요?</dt>
+  <dd>필수가 아닙니다. 운영비가 필요하지 않으면 제출하지 않아도 됩니다.
+    다만, 신청하지 않을 경우에도 "희망하지 않습니다"로 제출해 주시면
+    담당자가 미제출 독촉을 하지 않아 양측 모두 편리합니다.</dd>
+
+  <dt>한도를 초과하는 금액이 필요합니다 (실험실습 재료 등).</dt>
+  <dd>실험실습 재료(키트 등)로 인해 한도 초과가 필요한 경우,
+    담당 장학사(☎ 041-640-7221)에게 별도 문의해 주세요.</dd>
+
+  <dt>학생 간식비도 신청할 수 있나요?</dt>
+  <dd>오프라인 수업 활동이 있을 경우에만 학생 1인당 6,000원 한도로 사용 가능합니다.</dd>
+</dl>
+
+<div class="footer">
+  충청남도교육청 중등교육과 · 문의: 담당 장학사 041-640-7221
+</div>
+
+</body>
+</html>
