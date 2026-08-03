@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수업운영비 신청서 · 2026학년도 1학기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700&family=Noto+Sans+KR:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!-- jsPDF for PDF generation -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy:   #0d2444;
+    --navy2:  #1a3a5c;
+    --blue:   #1e5fa8;
+    --sky:    #3b82c4;
+    --gold:   #c9a84c;
+    --gold2:  #e8c96a;
+    --cream:  #faf7f0;
+    --paper:  #fff9f0;
+    --border: #d4c9b0;
+    --text:   #1a1a2e;
+    --muted:  #6b6b80;
+    --red:    #c0392b;
+    --orange: #e67e22;
+    --shadow: 0 4px 24px rgba(13,36,68,0.10);
+    --radius: 6px;
+  }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.7;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(30,95,168,0.06) 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent, transparent 31px, rgba(212,201,176,0.15) 31px, rgba(212,201,176,0.15) 32px);
+  }
+
+  /* HEADER */
+  .site-header { background: var(--navy); padding: 0; position: relative; overflow: hidden; }
+  .site-header::before {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(-55deg, transparent, transparent 30px, rgba(255,255,255,0.018) 30px, rgba(255,255,255,0.018) 60px);
+  }
+  .header-inner { max-width: 780px; margin: 0 auto; padding: 40px 24px 36px; position: relative; }
+  .header-badge {
+    display: inline-block; background: var(--gold); color: var(--navy);
+    font-size: 11px; font-weight: 700; letter-spacing: 0.12em;
+    padding: 4px 12px; border-radius: 2px; margin-bottom: 16px;
+  }
+  .header-title { font-family: 'Noto Serif KR', serif; font-size: clamp(20px, 4vw, 27px); font-weight: 700; color: #fff; line-height: 1.4; }
+  .header-title span { color: var(--gold2); }
+  .header-sub { margin-top: 10px; font-size: 13px; color: rgba(255,255,255,0.55); font-weight: 300; }
+
+  /* NOTICE */
+  .notice-wrap { max-width: 780px; margin: 28px auto 0; padding: 0 24px; }
+  .notice { background: var(--paper); border: 1px solid var(--border); border-left: 4px solid var(--gold); border-radius: var(--radius); padding: 18px 20px; }
+  .notice-title { font-size: 12px; font-weight: 700; color: var(--navy2); letter-spacing: 0.06em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .notice ul { list-style: none; font-size: 12.5px; color: var(--muted); line-height: 2; }
+  .notice ul li::before { content: '▶ '; color: var(--gold); font-size: 10px; }
+  .notice ul li strong { color: var(--red); font-weight: 600; }
+  .notice ul li.warn-line { background: rgba(192,57,43,0.04); border-radius: 4px; padding: 4px 8px; margin-top: 4px; }
+
+  /* FORM WRAP */
+  .form-wrap { max-width: 780px; margin: 28px auto 60px; padding: 0 24px; }
+  .card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); margin-bottom: 20px; overflow: hidden; }
+  .card-head { background: var(--navy2); padding: 14px 22px; display: flex; align-items: center; gap: 10px; }
+  .card-head-num { width: 24px; height: 24px; background: var(--gold); color: var(--navy); border-radius: 50%; font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .card-head-title { font-family: 'Noto Serif KR', serif; font-size: 15px; font-weight: 600; color: #fff; }
+  .card-body { padding: 24px 22px; }
+
+  /* FIELDS */
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+  .field-row.full { grid-template-columns: 1fr; }
+  .field-row.triple { grid-template-columns: 1fr 1fr 1fr; }
+  @media (max-width: 580px) { .field-row, .field-row.triple { grid-template-columns: 1fr; } }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 12.5px; font-weight: 600; color: var(--navy2); letter-spacing: 0.02em; }
+  .field label .req { color: var(--red); margin-left: 2px; }
+  .field label .hint { font-weight: 400; color: var(--muted); font-size: 11px; margin-left: 4px; }
+
+  input[type="text"], input[type="number"], textarea, select {
+    width: 100%; border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 10px 13px; font-family: 'Noto Sans KR', sans-serif; font-size: 14px;
+    color: var(--text); background: #fdfcfa; transition: border-color 0.15s, box-shadow 0.15s; outline: none;
+  }
+  input:focus, textarea:focus, select:focus { border-color: var(--sky); box-shadow: 0 0 0 3px rgba(59,130,196,0.12); background: #fff; }
+  input[readonly], input[disabled] { background: #f0eee8; color: var(--muted); cursor: default; }
+  input.error, select.error { border-color: var(--red); }
+  textarea { resize: vertical; min-height: 70px; }
+
+  /* COURSE SELECT */
+  .course-select-wrap { position: relative; }
+  .course-select-wrap select { padding-right: 36px; appearance: none; }
+  .course-select-wrap::after { content: '▾'; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; font-size: 14px; }
+
+  .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+  @media (max-width: 580px) { .info-grid { grid-template-columns: 1fr 1fr; } }
+  .info-chip { background: #f0eee8; border: 1px solid var(--border); border-radius: var(--radius); padding: 8px 12px; }
+  .info-chip-label { font-size: 10.5px; font-weight: 700; color: var(--muted); letter-spacing: 0.05em; margin-bottom: 3px; }
+  .info-chip-value { font-size: 13.5px; font-weight: 600; color: var(--navy2); min-height: 20px; }
+
+  /* TOGGLE */
+  .toggle-group { display: flex; gap: 12px; }
+  .toggle-btn { flex: 1; padding: 10px; border: 2px solid var(--border); border-radius: var(--radius); background: #fdfcfa; font-family: 'Noto Sans KR', sans-serif; font-size: 13.5px; font-weight: 500; color: var(--muted); cursor: pointer; transition: all 0.15s; text-align: center; }
+  .toggle-btn.active-yes { border-color: var(--blue); background: rgba(30,95,168,0.06); color: var(--blue); font-weight: 700; }
+  .toggle-btn.active-no  { border-color: var(--muted); background: rgba(107,107,128,0.06); color: var(--muted); font-weight: 600; }
+
+  /* EXPENSE */
+  .expense-section { display: none; margin-top: 4px; }
+  .expense-section.visible { display: block; }
+
+  .expense-item { border: 1px solid #e8e0d0; border-radius: var(--radius); padding: 16px; margin-bottom: 12px; background: #faf8f4; position: relative; animation: slideIn 0.2s ease; }
+  @keyframes slideIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+  .expense-item-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .item-num { font-size: 11px; font-weight: 700; color: var(--navy2); background: var(--gold2); padding: 2px 8px; border-radius: 2px; }
+  .btn-remove { background: none; border: 1px solid #ddd; border-radius: 4px; padding: 3px 10px; font-size: 12px; color: var(--red); cursor: pointer; font-family: 'Noto Sans KR', sans-serif; transition: all 0.12s; }
+  .btn-remove:hover { background: rgba(192,57,43,0.06); border-color: var(--red); }
+
+  .expense-grid { display: grid; grid-template-columns: 1.3fr 2fr 1fr; gap: 10px; }
+  @media (max-width: 560px) { .expense-grid { grid-template-columns: 1fr; } }
+  .expense-grid label { font-size: 11.5px; font-weight: 600; color: var(--navy2); display: block; margin-bottom: 5px; }
+
+  .btn-add { width: 100%; padding: 11px; border: 2px dashed var(--border); border-radius: var(--radius); background: transparent; font-family: 'Noto Sans KR', sans-serif; font-size: 13px; color: var(--sky); cursor: pointer; font-weight: 500; transition: all 0.15s; margin-top: 4px; }
+  .btn-add:hover { border-color: var(--sky); background: rgba(59,130,196,0.04); }
+
+  /* LIMIT WARNING */
+  .limit-alert { display: none; margin-top: 14px; border-radius: var(--radius); overflow: hidden; }
+  .limit-alert.show { display: block; }
+  .limit-alert-body { padding: 14px 16px; background: rgba(192,57,43,0.05); border: 1px solid rgba(192,57,43,0.25); }
+  .limit-alert-title { font-size: 13px; font-weight: 700; color: var(--red); margin-bottom: 6px; }
+  .limit-alert-desc { font-size: 12px; color: #7a2520; line-height: 1.7; }
+  .limit-alert-desc strong { font-weight: 700; }
+
+  /* TOTAL */
+  .total-bar { margin-top: 16px; background: var(--navy); border-radius: var(--radius); padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
+  .total-label { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.7); letter-spacing: 0.04em; }
+  .total-amount { font-family: 'Noto Serif KR', serif; font-size: 22px; font-weight: 700; color: var(--gold2); font-variant-numeric: tabular-nums; }
+  .total-unit { font-size: 12px; color: rgba(255,255,255,0.4); margin-left: 4px; vertical-align: middle; }
+  .total-bar.over { background: var(--red); }
+
+  /* SUBMIT */
+  .submit-area { text-align: center; padding-top: 8px; }
+  .btn-submit { display: inline-flex; align-items: center; gap: 8px; background: var(--navy2); color: #fff; border: none; border-radius: var(--radius); padding: 15px 48px; font-family: 'Noto Sans KR', sans-serif; font-size: 15px; font-weight: 600; cursor: pointer; letter-spacing: 0.04em; transition: all 0.18s; box-shadow: 0 4px 16px rgba(13,36,68,0.18); }
+  .btn-submit:hover { background: var(--blue); transform: translateY(-1px); }
+  .btn-submit:active { transform: translateY(0); }
+  .btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .submit-note { margin-top: 12px; font-size: 12px; color: var(--muted); }
+
+  /* RESULT */
+  .result-screen { display: none; text-align: center; padding: 60px 24px; }
+  .result-screen.show { display: block; }
+  .result-icon { font-size: 64px; margin-bottom: 20px; }
+  .result-title { font-family: 'Noto Serif KR', serif; font-size: 22px; font-weight: 700; color: var(--navy); margin-bottom: 10px; }
+  .result-sub { font-size: 14px; color: var(--muted); line-height: 1.8; }
+  .result-seq { display: none; margin-top: 16px; background: var(--navy); color: var(--gold2); font-size: 13px; font-weight: 700; padding: 8px 20px; border-radius: 4px; letter-spacing: 0.06em; }
+  .result-actions { margin-top: 24px; display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn-secondary { padding: 10px 28px; border: 1px solid var(--border); border-radius: var(--radius); font-size: 13px; color: var(--navy2); cursor: pointer; font-family: 'Noto Sans KR', sans-serif; background: #fff; transition: background 0.12s; }
+  .btn-secondary:hover { background: var(--cream); }
+  .btn-pdf { padding: 10px 28px; border: 1px solid var(--blue); border-radius: var(--radius); font-size: 13px; color: var(--blue); cursor: pointer; font-family: 'Noto Sans KR', sans-serif; background: rgba(30,95,168,0.05); font-weight: 600; transition: all 0.12s; }
+  .btn-pdf:hover { background: rgba(30,95,168,0.1); }
+
+  /* LOADING */
+  .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(13,36,68,0.55); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
+  .loading-overlay.show { display: flex; }
+  .spinner { width: 44px; height: 44px; border: 4px solid rgba(255,255,255,0.2); border-top-color: var(--gold2); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { color: #fff; font-size: 14px; font-weight: 500; }
+
+  /* ERROR MSG */
+  .error-msg { display: none; font-size: 11px; color: var(--red); margin-top: 4px; }
+  .error-msg.show { display: block; }
+
+  /* SPINNER in select */
+  .course-loading { font-size: 12px; color: var(--muted); margin-top: 6px; display: none; }
+  .course-loading.show { display: block; }
+</style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">처리 중...</div>
+</div>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-badge">2026학년도 1학기</div>
+    <h1 class="header-title">참학력 온라인 공동교육과정<br><span>수업운영비 신청서</span></h1>
+    <p class="header-sub">충남온라인학교 · 수업 지도교사 전용</p>
+  </div>
+</header>
+
+<!-- NOTICE -->
+<div class="notice-wrap">
+  <div class="notice">
+    <div class="notice-title">📋 작성 시 참고사항</div>
+    <ul>
+      <li>필수 신청사항이 아니며 희망하는 경우만 신청하세요.</li>
+      <li>운영 소요예산 작성 시 <strong>천원 단위</strong>에 맞춰 작성 (백원 이하 절사)</li>
+      <li>운영비의 5% 범위 내에서 업무추진비 편성 가능</li>
+      <li>운영비는 수업 교사(강사) <strong>소속교로 교부됩니다.</strong></li>
+      <li class="warn-line">⚠ <strong>운영비 지원 한도: 수강인원 × 20,000원</strong> — 강좌 선택 후 한도가 자동 계산됩니다</li>
+      <li class="warn-line">🔬 <strong>실험실습 재료(키트 등) 필요로 한도 초과가 필요한 경우:</strong><br>
+        &nbsp;&nbsp;&nbsp;담당 장학사에게 별도 문의 — <strong>☎ 041-640-7221</strong></li>
+      <li>학생지원물품, 실험실습형 수업재료 구입 이외의 사항은 집행 불가 (추후 환수)</li>
+      <li>학생 간식비는 오프라인 수업 활동이 있을 경우만 학생 1인당 6,000원 한도로 사용 가능</li>
+    </ul>
+  </div>
+</div>
+
+<!-- FORM -->
+<div class="form-wrap">
+
+  <!-- 결과 화면 -->
+  <div id="resultScreen" class="result-screen card">
+    <div class="result-icon" id="resultIcon">✅</div>
+    <div class="result-title" id="resultTitle">신청이 완료되었습니다</div>
+    <div class="result-sub" id="resultSub"></div>
+    <div class="result-seq" id="resultSeq"></div>
+    <div class="result-actions">
+      <button class="btn-pdf" onclick="downloadPDF()">📄 PDF 다운로드</button>
+      <button class="btn-secondary" onclick="resetForm()">다시 작성하기</button>
+    </div>
+  </div>
+
+  <form id="mainForm" novalidate onkeydown="return event.key !== 'Enter';">
+
+    <!-- 1. 강좌 선택 -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-num">1</div>
+        <div class="card-head-title">강좌 선택</div>
+      </div>
+      <div class="card-body">
+        <div class="field">
+          <label>강좌코드 <span class="req">*</span> <span class="hint">(선택하면 정보가 자동 입력됩니다)</span></label>
+          <div class="course-select-wrap">
+            <select id="courseSelect" onchange="onCourseSelect()">
+              <option value="">— 강좌코드를 선택하세요 —</option>
+            </select>
+          </div>
+          <div class="course-loading" id="courseLoading">⏳ 강좌 목록을 불러오는 중...</div>
+          <div class="error-msg" id="err-course">강좌를 선택해 주세요.</div>
+        </div>
+
+        <div class="info-grid" id="courseInfoGrid" style="display:none;">
+          <div class="info-chip">
+            <div class="info-chip-label">과목명</div>
+            <div class="info-chip-value" id="chip-subject">—</div>
+          </div>
+          <div class="info-chip">
+            <div class="info-chip-label">담당교사</div>
+            <div class="info-chip-value" id="chip-teacher">—</div>
+          </div>
+          <div class="info-chip">
+            <div class="info-chip-label">소속학교</div>
+            <div class="info-chip-value" id="chip-school">—</div>
+          </div>
+          <div class="info-chip">
+            <div class="info-chip-label">전공</div>
+            <div class="info-chip-value" id="chip-major">—</div>
+          </div>
+          <div class="info-chip">
+            <div class="info-chip-label">수업요일</div>
+            <div class="info-chip-value" id="chip-day">—</div>
+          </div>
+          <div class="info-chip" style="background: rgba(30,95,168,0.06); border-color: #c8d8eb;">
+            <div class="info-chip-label" style="color: var(--blue);">수강인원</div>
+            <div class="info-chip-value" style="color: var(--blue); font-size:18px;" id="chip-students">—</div>
+          </div>
+        </div>
+
+        <!-- hidden inputs for form data -->
+        <input type="hidden" id="h-courseCode">
+        <input type="hidden" id="h-subjectCode">
+        <input type="hidden" id="h-subjectName">
+        <input type="hidden" id="h-teacherName">
+        <input type="hidden" id="h-teacherSchool">
+        <input type="hidden" id="h-teacherContact">
+        <input type="hidden" id="h-major">
+        <input type="hidden" id="h-day">
+        <input type="hidden" id="h-students">
+      </div>
+    </div>
+
+    <!-- 2. 운영비 희망 여부 -->
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-num">2</div>
+        <div class="card-head-title">수업운영비 신청 여부</div>
+      </div>
+      <div class="card-body">
+        <div class="toggle-group">
+          <button type="button" class="toggle-btn" id="btnYes" onclick="setWants(true)">✔ 희망합니다</button>
+          <button type="button" class="toggle-btn" id="btnNo"  onclick="setWants(false)">✕ 희망하지 않습니다</button>
+        </div>
+        <div class="error-msg" id="err-wants">희망 여부를 선택해 주세요.</div>
+      </div>
+    </div>
+
+    <!-- 3. 운영비 항목 -->
+    <div class="card expense-section" id="expenseSection">
+      <div class="card-head">
+        <div class="card-head-num">3</div>
+        <div class="card-head-title">운영 소요예산 <span style="font-size:12px;font-weight:400;opacity:0.7;">한도: <span id="maxAmountLabel">강좌 선택 후 표시</span></span></div>
+      </div>
+      <div class="card-body">
+        <div id="itemList"></div>
+
+        <div id="limitAlert" class="limit-alert">
+          <div class="limit-alert-body">
+            <div class="limit-alert-title">⚠ 최대 지원 금액(<span id="alertMaxAmount">0</span>원)을 초과하였습니다</div>
+            <div class="limit-alert-desc">
+              일반 운영비의 지원 한도는 <strong>수강인원 × 20,000원</strong>입니다.<br>
+              실험실습 재료·키트 등으로 인해 한도 초과가 필요한 경우,<br>
+              담당 장학사에게 별도 문의해 주세요: <strong>☎ 041-640-7221</strong>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="btn-add" id="btnAdd" onclick="addItem()">+ 항목 추가</button>
+
+        <div class="total-bar" id="totalBar">
+          <span class="total-label">총 소요예산</span>
+          <span>
+            <span class="total-amount" id="totalDisplay">0</span>
+            <span class="total-unit">원</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. 비고 -->
+    <div class="card" id="noteCard" style="display:none;">
+      <div class="card-head">
+        <div class="card-head-num">4</div>
+        <div class="card-head-title">비고 <span style="font-size:12px;font-weight:400;opacity:0.7;">(선택)</span></div>
+      </div>
+      <div class="card-body">
+        <textarea id="note" placeholder="추가로 전달할 사항이 있으면 입력해 주세요."></textarea>
+      </div>
+    </div>
+
+    <!-- 제출 -->
+    <div class="submit-area">
+      <button type="submit" class="btn-submit" id="submitBtn">
+        <span>📨</span> 신청서 제출하기
+      </button>
+      <div class="submit-note">제출 시 PDF가 자동 생성됩니다. 공문 발송에 활용해 주세요.</div>
+    </div>
+
+  </form>
+</div>
+
+<script>
+// ============================================================
+// ⚙️ 설정값 — 배포 전 반드시 수정하세요
+// ============================================================
+const CONFIG = {
+  // ⚠️ Google Apps Script 배포 후 받은 웹 앱 URL로 교체하세요
+  APPS_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbxMiSIWRFAAr2zYuSrxzee8mpV8IHrziqGaaU9FzW3djuea-qvYwIfVAClnvTdmsS3CGQ/exec",
+
+  AMOUNT_PER_STUDENT: 20000,  // 수강생 1인당 운영비 (원)
+};
+
+// 현재 선택된 강좌의 수강인원 기반 최대 금액 반환
+function getMaxAmount() {
+  const students = parseInt(document.getElementById('h-students').value) || 0;
+  return students > 0 ? students * CONFIG.AMOUNT_PER_STUDENT : 0;
+}
+// ============================================================
+
+let wantsExpense = null;
+let itemCount = 0;
+let courseData = [];    // 전체 강좌 목록
+let selectedCourse = null;  // 선택된 강좌 행
+let lastSubmitPayload = null; // PDF 재생성용
+
+// ────────────────────────────────
+// 강좌 목록 로드 (Google Sheets CSV export)
+// ────────────────────────────────
+async function loadCourses() {
+  const loadingEl = document.getElementById('courseLoading');
+  const selectEl  = document.getElementById('courseSelect');
+  loadingEl.classList.add('show');
+
+  try {
+    // Apps Script에서 강좌 목록 가져오기
+    const url = CONFIG.APPS_SCRIPT_URL + '?action=courses';
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+
+    if (!json.success) throw new Error(json.error || '강좌 목록 로드 실패');
+
+    courseData = json.courses;
+
+    courseData.forEach(course => {
+      const opt = document.createElement('option');
+      opt.value = course.courseCode;
+      opt.textContent = `${course.courseCode}  ${course.subjectName} (${course.teacherName})`;
+      selectEl.appendChild(opt);
+    });
+
+    loadingEl.classList.remove('show');
+  } catch(e) {
+    loadingEl.textContent = '⚠ 강좌 목록을 불러올 수 없습니다. Apps Script URL을 확인하거나 페이지를 새로고침해 주세요.';
+    loadingEl.style.color = '#c0392b';
+    console.error(e);
+  }
+}
+
+function onCourseSelect() {
+  const val = document.getElementById('courseSelect').value;
+  document.getElementById('err-course').classList.remove('show');
+
+  if (!val) {
+    selectedCourse = null;
+    document.getElementById('courseInfoGrid').style.display = 'none';
+    clearHiddenInputs();
+    return;
+  }
+
+  const course = courseData.find(c => c.courseCode === val);
+  if (!course) return;
+  selectedCourse = course;
+
+  document.getElementById('chip-subject').textContent  = course.subjectName    || '—';
+  document.getElementById('chip-teacher').textContent  = course.teacherName    || '—';
+  document.getElementById('chip-school').textContent   = course.teacherSchool  || '—';
+  document.getElementById('chip-major').textContent    = course.major          || '—';
+  document.getElementById('chip-day').textContent      = course.dayOfWeek      || '—';
+  document.getElementById('chip-students').textContent = course.students       || '—';
+
+  document.getElementById('h-courseCode').value     = course.courseCode     || '';
+  document.getElementById('h-subjectCode').value    = course.subjectCode    || '';
+  document.getElementById('h-subjectName').value    = course.subjectName    || '';
+  document.getElementById('h-teacherName').value    = course.teacherName    || '';
+  document.getElementById('h-teacherSchool').value  = course.teacherSchool  || '';
+  document.getElementById('h-teacherContact').value = course.teacherContact || '';
+  document.getElementById('h-major').value          = course.major          || '';
+  document.getElementById('h-day').value            = course.dayOfWeek      || '';
+  document.getElementById('h-students').value       = course.students       || '';
+
+  document.getElementById('courseInfoGrid').style.display = 'grid';
+}
+
+function clearHiddenInputs() {
+  ['h-courseCode','h-subjectCode','h-subjectName','h-teacherName',
+   'h-teacherSchool','h-teacherContact','h-major','h-day','h-students']
+    .forEach(id => document.getElementById(id).value = '');
+}
+
+// ────────────────────────────────
+// 운영비 희망 여부 토글
+// ────────────────────────────────
+function setWants(val) {
+  wantsExpense = val;
+  document.getElementById('err-wants').classList.remove('show');
+  const btnYes = document.getElementById('btnYes');
+  const btnNo  = document.getElementById('btnNo');
+  btnYes.className = 'toggle-btn' + (val ? ' active-yes' : '');
+  btnNo.className  = 'toggle-btn' + (!val ? ' active-no' : '');
+
+  const sec  = document.getElementById('expenseSection');
+  const note = document.getElementById('noteCard');
+
+  if (val) {
+    sec.classList.add('visible');
+    note.style.display = 'block';
+    if (itemCount === 0) addItem();
+  } else {
+    sec.classList.remove('visible');
+    note.style.display = 'block';
+    document.getElementById('itemList').innerHTML = '';
+    itemCount = 0;
+    updateTotal();
+  }
+}
+
+// ────────────────────────────────
+// 항목 관리
+// ────────────────────────────────
+function addItem() {
+  const maxAmount = getMaxAmount();
+  if (maxAmount === 0) { alert("먼저 강좌를 선택해 주세요."); return; }
+  const total = getCurrentTotal();
+  if (total >= maxAmount) {
+    alert(`이미 최대 지원 금액(${maxAmount.toLocaleString()}원)에 도달하였습니다.\n실험실습 재료가 필요한 경우 담당 장학사(041-640-7221)에게 문의하세요.`);
+    return;
+  }
+
+  itemCount++;
+  const id = `item_${Date.now()}`;
+  const div = document.createElement('div');
+  div.className = 'expense-item';
+  div.id = id;
+  div.innerHTML = `
+    <div class="expense-item-head">
+      <span class="item-num">항목 ${itemCount}</span>
+      <button type="button" class="btn-remove" onclick="removeItem('${id}')">삭제</button>
+    </div>
+    <div class="expense-grid">
+      <div>
+        <label>구분 <span style="color:var(--red)">*</span></label>
+        <input type="text" placeholder="예) 도서/간식/수업용품" class="item-category">
+      </div>
+      <div>
+        <label>산출식</label>
+        <input type="text" placeholder="예) 교재 10,000원 × 10명" class="item-formula">
+      </div>
+      <div>
+        <label>금액 (원) <span style="color:var(--red)">*</span></label>
+        <input type="number" placeholder="0" min="0" step="1000"
+          oninput="onAmountInput(this)" class="item-amount" style="text-align:right;">
+      </div>
+    </div>
+  `;
+  document.getElementById('itemList').appendChild(div);
+  renumberItems();
+  updateTotal();
+  div.querySelector('.item-category').focus();
+}
+
+function onAmountInput(el) {
+  const maxAmount = getMaxAmount();
+  if (!maxAmount) { updateTotal(); return; }
+
+  // 현재 필드를 제외한 나머지 항목들의 합계
+  let otherTotal = 0;
+  document.querySelectorAll('#itemList .item-amount').forEach(inp => {
+    if (inp !== el) otherTotal += parseFloat(inp.value) || 0;
+  });
+
+  const val = parseFloat(el.value) || 0;
+  const allowed = Math.max(0, maxAmount - otherTotal);
+
+  if (val > allowed) el.value = allowed;
+
+  updateTotal();
+}
+
+function removeItem(id) {
+  const el = document.getElementById(id);
+  if (el) { el.remove(); renumberItems(); updateTotal(); }
+}
+
+function renumberItems() {
+  const items = document.querySelectorAll('#itemList .expense-item');
+  itemCount = items.length;
+  items.forEach((el, i) => el.querySelector('.item-num').textContent = `항목 ${i + 1}`);
+}
+
+function getCurrentTotal() {
+  let t = 0;
+  document.querySelectorAll('#itemList .item-amount').forEach(inp => { t += parseFloat(inp.value) || 0; });
+  return t;
+}
+
+function updateTotal() {
+  const total = getCurrentTotal();
+  const maxAmount = getMaxAmount();
+  const disp  = document.getElementById('totalDisplay');
+  const bar   = document.getElementById('totalBar');
+  const alertEl = document.getElementById('limitAlert');
+  const btnAdd = document.getElementById('btnAdd');
+
+  disp.textContent = total.toLocaleString('ko-KR');
+
+  // 한도 라벨 업데이트
+  const maxLabel = document.getElementById('maxAmountLabel');
+  const alertMax = document.getElementById('alertMaxAmount');
+  if (maxAmount > 0) {
+    if (maxLabel) maxLabel.textContent = maxAmount.toLocaleString() + '원';
+    if (alertMax) alertMax.textContent = maxAmount.toLocaleString();
+  } else {
+    if (maxLabel) maxLabel.textContent = '강좌 선택 후 표시';
+  }
+
+  if (maxAmount > 0 && total > maxAmount) {
+    bar.classList.add('over');
+    alertEl.classList.add('show');
+  } else {
+    bar.classList.remove('over');
+    alertEl.classList.remove('show');
+  }
+
+  // 최대 도달 시 추가 버튼 안내
+  btnAdd.textContent = (maxAmount > 0 && total >= maxAmount)
+    ? `✕ 최대 금액 도달 (${maxAmount.toLocaleString()}원) — 추가 불가`
+    : '+ 항목 추가';
+}
+
+function getItems() {
+  const items = [];
+  document.querySelectorAll('#itemList .expense-item').forEach(el => {
+    items.push({
+      category: el.querySelector('.item-category').value.trim(),
+      formula:  el.querySelector('.item-formula').value.trim(),
+      amount:   parseFloat(el.querySelector('.item-amount').value) || 0
+    });
+  });
+  return items;
+}
+
+// ────────────────────────────────
+// 유효성 검사
+// ────────────────────────────────
+function validate() {
+  let ok = true;
+
+  if (!document.getElementById('h-courseCode').value) {
+    document.getElementById('courseSelect').classList.add('error');
+    document.getElementById('err-course').classList.add('show');
+    ok = false;
+  } else {
+    document.getElementById('courseSelect').classList.remove('error');
+  }
+
+  if (wantsExpense === null) {
+    document.getElementById('err-wants').classList.add('show');
+    ok = false;
+  }
+
+  if (wantsExpense) {
+    const items = getItems();
+    if (items.length === 0) { alert('운영비 항목을 1개 이상 입력해 주세요.'); ok = false; }
+    else {
+      document.querySelectorAll('#itemList .expense-item').forEach(el => {
+        const cat = el.querySelector('.item-category');
+        const amt = el.querySelector('.item-amount');
+        if (!cat.value.trim()) { cat.classList.add('error'); ok = false; }
+        else cat.classList.remove('error');
+        if (!amt.value || parseFloat(amt.value) <= 0) { amt.classList.add('error'); ok = false; }
+        else amt.classList.remove('error');
+      });
+    }
+    const maxAmount = getMaxAmount();
+    const total = getCurrentTotal();
+    if (maxAmount > 0 && total > maxAmount) {
+      alert(`총 소요예산(${total.toLocaleString()}원)이 최대 지원 금액(${maxAmount.toLocaleString()}원)을 초과하였습니다.\n실험실습 재료·키트가 필요한 경우 담당 장학사(041-640-7221)에게 문의하세요.`);
+      ok = false;
+    }
+  }
+
+  return ok;
+}
+
+// ────────────────────────────────
+// 제출
+// ────────────────────────────────
+document.getElementById('mainForm').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  if (!validate()) return;
+
+  const items = wantsExpense ? getItems() : [];
+  const totalAmount = items.reduce((s, i) => s + i.amount, 0);
+
+  const payload = {
+    courseCode:     document.getElementById('h-courseCode').value,
+    subjectCode:    document.getElementById('h-subjectCode').value,
+    subjectName:    document.getElementById('h-subjectName').value,
+    teacherName:    document.getElementById('h-teacherName').value,
+    teacherSchool:  document.getElementById('h-teacherSchool').value,
+    teacherContact: document.getElementById('h-teacherContact').value,
+    major:          document.getElementById('h-major').value,
+    dayOfWeek:      document.getElementById('h-day').value,
+    students:       document.getElementById('h-students').value,
+    wantsExpense:   wantsExpense,
+    items:          items,
+    totalAmount:    totalAmount,
+    note:           document.getElementById('note').value.trim()
+  };
+
+  lastSubmitPayload = payload;
+
+  showLoading('제출 중...');
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+
+  try {
+    const res = await fetch(CONFIG.APPS_SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    hideLoading();
+
+    // PDF 생성 & 다운로드
+    await generateAndDownloadPDF(payload, json.seq);
+
+    // 결과 화면
+    document.getElementById('mainForm').style.display = 'none';
+    const rs = document.getElementById('resultScreen');
+    rs.style.display = 'block';
+
+    if (json.success) {
+      document.getElementById('resultIcon').textContent = '✅';
+      document.getElementById('resultTitle').textContent = '신청이 완료되었습니다';
+      document.getElementById('resultSub').innerHTML =
+        `<strong>${payload.teacherName}</strong> 선생님(${payload.teacherSchool})의<br>` +
+        `<strong>${payload.subjectName}</strong> 강좌 운영비 신청을 접수하였습니다.<br><br>` +
+        `PDF가 자동 다운로드 되었습니다. 공문으로 발송해 주세요.`;
+      if (json.seq) {
+        const seqEl = document.getElementById('resultSeq');
+        seqEl.textContent = `접수번호: ${json.seq}`;
+        seqEl.style.display = 'inline-block';
+      }
+    } else {
+      document.getElementById('resultIcon').textContent = '⚠️';
+      document.getElementById('resultTitle').textContent = '스프레드시트 저장 중 오류';
+      document.getElementById('resultSub').innerHTML = 'PDF는 다운로드 되었습니다. 담당자에게 PDF를 직접 전달해 주세요.';
+    }
+  } catch(err) {
+    hideLoading();
+    btn.disabled = false;
+    // 네트워크 오류여도 PDF는 생성
+    await generateAndDownloadPDF(payload, null);
+    alert('서버 연결에 실패했습니다. PDF는 다운로드 되었으니 담당자에게 직접 전달해 주세요.\n\n오류: ' + err.message);
+  }
+});
+
+// ────────────────────────────────
+// PDF 생성
+// ────────────────────────────────
+async function generateAndDownloadPDF(payload, seq) {
+  showLoading('PDF 생성 중...');
+  await new Promise(r => setTimeout(r, 100));
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  // 한글 폰트가 없으므로 기본 폰트 사용 (한글은 이미지 or canvas 방식이 필요)
+  // — 실용적 해결: 브라우저 canvas로 렌더링 후 이미지 삽입
+  hideLoading();
+  await renderPDFViaCanvas(payload, seq);
+}
+
+async function renderPDFViaCanvas(payload, seq) {
+  // canvas로 A4 비율 렌더
+  // SCALE=3 → 794*3=2382 x 1123*3=3369px ≈ 288dpi (인쇄 품질)
+  const SCALE = 3;
+  const W = 794, H = 1123; // 논리 좌표계 (그대로 유지)
+  const canvas = document.createElement('canvas');
+  canvas.width  = W * SCALE;
+  canvas.height = H * SCALE;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(SCALE, SCALE); // 이후 모든 draw 호출은 W×H 기준으로 작성
+
+  // Background
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  // Header band
+  ctx.fillStyle = '#0d2444';
+  ctx.fillRect(0, 0, W, 100);
+
+  // Gold accent bar
+  ctx.fillStyle = '#c9a84c';
+  ctx.fillRect(0, 100, W, 5);
+
+  // Header text
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 13px sans-serif';
+  ctx.fillText('2026학년도 1학기 참학력 온라인 공동교육과정', 40, 38);
+  ctx.font = 'bold 22px sans-serif';
+  ctx.fillText('수업운영비 신청서', 40, 72);
+  ctx.font = '11px sans-serif';
+  ctx.fillStyle = 'rgba(255,255,255,0.6)';
+  ctx.fillText('충남온라인학교', 40, 92);
+
+  // Date & seq
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
+  ctx.fillStyle = '#e8c96a';
+  ctx.font = '11px sans-serif';
+  ctx.fillText(`제출일: ${dateStr}${seq ? '  접수번호: '+seq : ''}`, W - 200, 92);
+
+  // Section helper
+  let y = 125;
+  function sectionTitle(title) {
+    ctx.fillStyle = '#1a3a5c';
+    ctx.fillRect(40, y, W - 80, 28);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 12px sans-serif';
+    ctx.fillText(title, 54, y + 18);
+    y += 28;
+  }
+  function labelValue(label, value, x, colW, rowH) {
+    ctx.fillStyle = '#f5f2ec';
+    ctx.fillRect(x, y, 110, rowH);
+    ctx.strokeStyle = '#d4c9b0';
+    ctx.lineWidth = 0.5;
+    ctx.strokeRect(x, y, 110, rowH);
+    ctx.fillStyle = '#6b6b80';
+    ctx.font = '10px sans-serif';
+    ctx.fillText(label, x + 8, y + rowH / 2 + 4);
+
+    ctx.fillStyle = '#1a1a2e';
+    ctx.font = '11px sans-serif';
+    ctx.strokeStyle = '#d4c9b0';
+    ctx.strokeRect(x + 110, y, colW - 110, rowH);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(x + 110 + 0.5, y + 0.5, colW - 110 - 1, rowH - 1);
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillText(value || '—', x + 118, y + rowH / 2 + 4);
+  }
+
+  const COL_W = (W - 80) / 2;
+  const RH = 28;
+
+  // ── 강좌 정보
+  sectionTitle('① 강좌 정보');
+  y += 4;
+  labelValue('강좌코드', payload.courseCode, 40, COL_W, RH);
+  labelValue('과목명', payload.subjectName, 40 + COL_W, COL_W, RH);
+  y += RH;
+  labelValue('담당교사', payload.teacherName, 40, COL_W, RH);
+  labelValue('소속학교', payload.teacherSchool, 40 + COL_W, COL_W, RH);
+  y += RH;
+  labelValue('전공', payload.major, 40, COL_W, RH);
+  labelValue('수업요일', payload.dayOfWeek, 40 + COL_W, COL_W, RH);
+  y += RH;
+  labelValue('수강인원', payload.students ? payload.students + '명' : '—', 40, COL_W, RH);
+  labelValue('연락처', payload.teacherContact, 40 + COL_W, COL_W, RH);
+  y += RH + 12;
+
+  // ── 운영비 신청 여부
+  sectionTitle('② 수업운영비 신청');
+  y += 6;
+  ctx.fillStyle = '#f5f2ec';
+  ctx.fillRect(40, y, W - 80, RH);
+  ctx.strokeStyle = '#d4c9b0';
+  ctx.lineWidth = 0.5;
+  ctx.strokeRect(40, y, W - 80, RH);
+  ctx.fillStyle = '#6b6b80';
+  ctx.font = '10px sans-serif';
+  ctx.fillText('희망 여부', 48, y + RH / 2 + 4);
+  ctx.fillStyle = payload.wantsExpense ? '#1e5fa8' : '#6b6b80';
+  ctx.font = 'bold 12px sans-serif';
+  ctx.fillText(payload.wantsExpense ? '✔ 희망합니다' : '✕ 희망하지 않습니다', 160, y + RH / 2 + 4);
+  y += RH + 12;
+
+  if (payload.wantsExpense && payload.items.length > 0) {
+    sectionTitle('③ 운영 소요예산 내역');
+    y += 4;
+
+    // Table header
+    const colWidths = [40, 160, 280, 110]; // 번호, 구분, 산출식, 금액
+    const colX = [40, 80, 240, 520];
+    ctx.fillStyle = '#e8e0d0';
+    ctx.fillRect(40, y, W - 80, 24);
+    ['번호','구분','산출식','금액(원)'].forEach((h, i) => {
+      ctx.strokeStyle = '#d4c9b0';
+      ctx.strokeRect(colX[i], y, colWidths[i], 24);
+      ctx.fillStyle = '#1a3a5c';
+      ctx.font = 'bold 10px sans-serif';
+      ctx.fillText(h, colX[i] + 6, y + 15);
+    });
+    y += 24;
+
+    payload.items.forEach((item, idx) => {
+      const rh = 26;
+      if (idx % 2 === 0) { ctx.fillStyle = '#fdfcfa'; } else { ctx.fillStyle = '#f5f2ec'; }
+      ctx.fillRect(40, y, W - 80, rh);
+      const vals = [String(idx+1), item.category, item.formula, item.amount.toLocaleString('ko-KR')];
+      vals.forEach((v, i) => {
+        ctx.strokeStyle = '#d4c9b0';
+        ctx.strokeRect(colX[i], y, colWidths[i], rh);
+        ctx.fillStyle = '#1a1a2e';
+        ctx.font = i === 3 ? 'bold 11px sans-serif' : '10px sans-serif';
+        // truncate
+        const maxW = colWidths[i] - 12;
+        let txt = v;
+        while (ctx.measureText(txt).width > maxW && txt.length > 1) txt = txt.slice(0,-1);
+        if (txt !== v) txt += '…';
+        ctx.fillText(txt, colX[i] + 6, y + 16);
+      });
+      y += rh;
+    });
+
+    // Total row
+    ctx.fillStyle = '#0d2444';
+    ctx.fillRect(40, y, W - 80, 30);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText('총 소요예산', 48, y + 19);
+    ctx.fillStyle = '#e8c96a';
+    ctx.font = 'bold 14px sans-serif';
+    const totalStr = payload.totalAmount.toLocaleString('ko-KR') + ' 원';
+    ctx.fillText(totalStr, colX[3] + 4, y + 20);
+    y += 30 + 12;
+  }
+
+  // ── 비고
+  if (payload.note) {
+    sectionTitle(payload.wantsExpense ? '④ 비고' : '③ 비고');
+    y += 4;
+    ctx.strokeStyle = '#d4c9b0';
+    ctx.strokeRect(40, y, W - 80, 50);
+    ctx.fillStyle = '#1a1a2e';
+    ctx.font = '11px sans-serif';
+    ctx.fillText(payload.note.substring(0, 100), 48, y + 20);
+    y += 50 + 12;
+  }
+
+  // ── 참고사항
+  y = Math.max(y, H - 160);
+  ctx.fillStyle = '#f5f2ec';
+  ctx.fillRect(40, y, W - 80, 100);
+  ctx.strokeStyle = '#d4c9b0';
+  ctx.strokeRect(40, y, W - 80, 100);
+  ctx.fillStyle = '#c9a84c';
+  ctx.fillRect(40, y, 4, 100);
+  ctx.fillStyle = '#1a3a5c';
+  ctx.font = 'bold 10px sans-serif';
+  ctx.fillText('※ 참고사항', 52, y + 16);
+  ctx.fillStyle = '#6b6b80';
+  ctx.font = '9.5px sans-serif';
+  const notes = [
+    '▶ 운영 소요예산 작성 시 천원 단위에 맞춰 작성 (백원 이하 절사)',
+    `▶ 운영비는 수업 교사(강사) 소속교로 교부 (수강인원 ${payload.students}명 × 20,000원 = ${(parseInt(payload.students)||0)*20000}원)`,
+    '▶ 학생 간식비: 운영비에서 1인당 1회 6,000원 이내 사용 가능',
+    '▶ 실험실습 재료·키트 등 한도 초과 필요 시: 담당 장학사 041-640-7221',
+    '▶ 학생지원물품, 실험실습형 수업재료 구입 이외의 사항은 집행 불가 (추후 환수)',
+  ];
+  notes.forEach((n, i) => { ctx.fillText(n, 52, y + 30 + i * 14); });
+
+  // Footer
+  ctx.fillStyle = '#0d2444';
+  ctx.fillRect(0, H - 30, W, 30);
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.font = '9px sans-serif';
+  ctx.fillText('충청남도교육청 · 충남온라인학교 · 2026학년도 1학기 온라인 공동교육과정 수업운영비 신청서', 40, H - 12);
+
+  // Canvas to PDF
+  const imgData = canvas.toDataURL('image/png', 0.95);
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
+
+  const filename = `수업운영비신청서_${payload.teacherName}_${payload.courseCode}_${dateStr.replace(/\./g,'')}.pdf`;
+  pdf.save(filename);
+}
+
+function downloadPDF() {
+  if (lastSubmitPayload) generateAndDownloadPDF(lastSubmitPayload, null);
+}
+
+// ────────────────────────────────
+// 유틸
+// ────────────────────────────────
+function showLoading(msg) {
+  document.getElementById('loadingText').textContent = msg || '처리 중...';
+  document.getElementById('loadingOverlay').classList.add('show');
+}
+function hideLoading() {
+  document.getElementById('loadingOverlay').classList.remove('show');
+}
+
+function resetForm() {
+  document.getElementById('mainForm').reset();
+  document.getElementById('mainForm').style.display = 'block';
+  document.getElementById('resultScreen').style.display = 'none';
+  document.getElementById('itemList').innerHTML = '';
+  document.getElementById('noteCard').style.display = 'none';
+  document.getElementById('expenseSection').classList.remove('visible');
+  document.getElementById('courseInfoGrid').style.display = 'none';
+  document.getElementById('courseSelect').value = '';
+  clearHiddenInputs();
+  wantsExpense = null; itemCount = 0; selectedCourse = null;
+  document.getElementById('totalDisplay').textContent = '0';
+  document.getElementById('totalBar').classList.remove('over');
+  document.getElementById('limitAlert').classList.remove('show');
+  document.getElementById('btnYes').className = 'toggle-btn';
+  document.getElementById('btnNo').className  = 'toggle-btn';
+  document.getElementById('submitBtn').disabled = false;
+}
+
+// 초기 실행
+loadCourses();
+</script>
+</body>
+</html>
