@@ -49,6 +49,8 @@ body {
 .notice-wrap { max-width: 780px; margin: 28px auto 0; padding: 0 24px; }
 .notice { background: var(--paper); border: 1px solid var(--border); border-left: 4px solid var(--gold); border-radius: var(--radius); padding: 18px 20px; }
 .notice-title { font-size: 12px; font-weight: 700; color: var(--navy2); letter-spacing: 0.06em; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+.manual-link { margin-left: auto; font-size: 11px; font-weight: 600; color: var(--blue); text-decoration: none; background: rgba(30,95,168,0.08); padding: 3px 10px; border-radius: 3px; letter-spacing: 0; white-space: nowrap; }
+.manual-link:hover { background: rgba(30,95,168,0.15); }
 .notice ul { list-style: none; font-size: 12.5px; color: var(--muted); line-height: 2; }
 .notice ul li::before { content: '▶ '; color: var(--gold); font-size: 10px; }
 .notice ul li strong { color: var(--red); font-weight: 600; }
