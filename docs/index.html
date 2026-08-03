@@ -1,11 +1,221 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>참학력 온라인 공동교육과정 수업운영비 신청</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수업운영비 신청서</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/print.css" media="print">
 </head>
 <body>
-  <p>준비 중입니다.</p>
+
+<!-- 로딩 오버레이 -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-text" id="loadingText">처리 중...</div>
+</div>
+
+<!-- 헤더 -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="header-badge" id="headerBadge"></div>
+    <h1 class="header-title" id="headerTitle">수업운영비 신청서</h1>
+    <p class="header-sub" id="headerSub">수업 지도교사 전용</p>
+  </div>
+</header>
+
+<!-- 안내문구 -->
+<div class="notice-wrap" id="noticeWrap">
+  <div class="notice">
+    <div class="notice-title">📋 작성 시 참고사항</div>
+    <ul>
+      <li>필수 신청사항이 아니며 희망하는 경우만 신청하세요.</li>
+      <li>운영 소요예산 작성 시 <strong>천원 단위</strong>에 맞춰 작성 (백원 이하 절사)</li>
+      <li>운영비의 5% 범위 내에서 업무추진비 편성 가능</li>
+      <li>운영비는 수업 교사(강사) <strong>소속교로 교부됩니다.</strong></li>
+      <li class="warn-line" id="noticeLimit">⚠ <strong>운영비 지원 한도: 수강인원 × 20,000원</strong> — 강좌 선택 후 한도가 자동 계산됩니다</li>
+      <li class="warn-line">🔬 <strong>실험실습 재료(키트 등) 필요로 한도 초과가 필요한 경우:</strong><br>
+        &nbsp;&nbsp;&nbsp;담당 장학사에게 별도 문의 — <strong>☎ 041-640-7221</strong></li>
+      <li>학생지원물품, 실험실습형 수업재료 구입 이외의 사항은 집행 불가 (추후 환수)</li>
+      <li>학생 간식비는 오프라인 수업 활동이 있을 경우만 학생 1인당 6,000원 한도로 사용 가능</li>
+      <li id="noticeExtra" style="display:none;"></li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===== 화면: 마감 ===== -->
+<div id="screenClosed" class="form-wrap" style="display:none;">
+  <div class="card">
+    <div class="card-body closed-card">
+      <div class="closed-icon">🔒</div>
+      <div class="closed-title">신청이 마감되었습니다</div>
+      <div class="closed-sub">문의: 담당 장학사 041-640-7221</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 화면: 강좌 선택 + 인증 ===== -->
+<div id="screenAuth" class="form-wrap" style="display:none;">
+  <div class="card">
+    <div class="card-head">
+      <div class="card-head-num">1</div>
+      <div class="card-head-title">강좌 선택</div>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <label>강좌코드 <span class="req">*</span> <span class="hint">(선택하면 정보가 표시됩니다)</span></label>
+        <div class="course-select-wrap">
+          <select id="courseSelect" onchange="Auth.onCourseSelect()">
+            <option value="">— 강좌를 선택하세요 —</option>
+          </select>
+        </div>
+      </div>
+      <div class="info-grid" id="courseInfoGrid" style="display:none;">
+        <div class="info-chip">
+          <div class="info-chip-label">과목명</div>
+          <div class="info-chip-value" id="chip-subject">—</div>
+        </div>
+        <div class="info-chip">
+          <div class="info-chip-label">담당교사</div>
+          <div class="info-chip-value" id="chip-teacher">—</div>
+        </div>
+        <div class="info-chip">
+          <div class="info-chip-label">소속학교</div>
+          <div class="info-chip-value" id="chip-school">—</div>
+        </div>
+        <div class="info-chip">
+          <div class="info-chip-label">전공</div>
+          <div class="info-chip-value" id="chip-major">—</div>
+        </div>
+        <div class="info-chip">
+          <div class="info-chip-label">수업요일</div>
+          <div class="info-chip-value" id="chip-day">—</div>
+        </div>
+        <div class="info-chip" style="background:rgba(30,95,168,0.06);border-color:#c8d8eb;">
+          <div class="info-chip-label" style="color:var(--blue);">수강인원</div>
+          <div class="info-chip-value" style="color:var(--blue);font-size:18px;" id="chip-students">—</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 본인 확인 카드 -->
+  <div id="authSection" class="card" style="display:none;">
+    <div class="card-head">
+      <div class="card-head-num">2</div>
+      <div class="card-head-title">본인 확인</div>
+    </div>
+    <div class="card-body">
+      <div class="field">
+        <label>교사 연락처 뒤 4자리 <span class="req">*</span></label>
+        <div class="auth-row">
+          <div class="field">
+            <input type="text" id="last4Input" maxlength="4" pattern="[0-9]{4}"
+              placeholder="뒷 4자리" inputmode="numeric"
+              style="text-align:center;font-size:18px;letter-spacing:8px;"
+              onkeydown="if(event.key==='Enter'){event.preventDefault();Auth.onVerify();}">
+          </div>
+          <button type="button" class="btn-verify" id="verifyBtn" onclick="Auth.onVerify()">확인</button>
+        </div>
+        <div class="error-msg" id="authError" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 화면: 신청 폼 ===== -->
+<div id="screenForm" class="form-wrap" style="display:none;">
+  <div id="editBanner" class="edit-banner" style="display:none;">
+    ⚠ 기존 신청서를 수정합니다. 제출하면 이전 내용을 대체합니다.
+  </div>
+
+  <div class="course-summary">
+    <span id="courseSummary"></span>
+    <button type="button" class="btn-change" onclick="App.reset()">강좌 변경</button>
+  </div>
+
+  <form id="mainForm" novalidate onkeydown="return event.key !== 'Enter';">
+    <div class="card">
+      <div class="card-head">
+        <div class="card-head-num">1</div>
+        <div class="card-head-title">수업운영비 신청 여부</div>
+      </div>
+      <div class="card-body">
+        <div class="toggle-group">
+          <button type="button" class="toggle-btn" id="btnYes" onclick="Form.setWants(true)">✔ 희망합니다</button>
+          <button type="button" class="toggle-btn" id="btnNo"  onclick="Form.setWants(false)">✕ 희망하지 않습니다</button>
+        </div>
+        <div class="error-msg" id="err-wants">희망 여부를 선택해 주세요.</div>
+      </div>
+    </div>
+
+    <div class="card expense-section" id="expenseSection">
+      <div class="card-head">
+        <div class="card-head-num">2</div>
+        <div class="card-head-title">운영 소요예산 <span style="font-size:12px;font-weight:400;opacity:0.7;">한도: <span id="maxAmountLabel">—</span></span></div>
+      </div>
+      <div class="card-body">
+        <div id="itemList"></div>
+        <div id="limitAlert" class="limit-alert">
+          <div class="limit-alert-body">
+            <div class="limit-alert-title">⚠ 최대 지원 금액(<span id="alertMaxAmount">0</span>원)을 초과하였습니다</div>
+            <div class="limit-alert-desc">
+              일반 운영비의 지원 한도는 <strong>수강인원 × <span id="alertUnitPrice">20,000</span>원</strong>입니다.<br>
+              실험실습 재료·키트 등으로 인해 한도 초과가 필요한 경우,<br>
+              담당 장학사에게 별도 문의해 주세요: <strong>☎ 041-640-7221</strong>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn-add" id="btnAdd" onclick="Form.addItem()">+ 항목 추가</button>
+        <div class="total-bar" id="totalBar">
+          <span class="total-label">총 소요예산</span>
+          <span>
+            <span class="total-amount" id="totalDisplay">0</span>
+            <span class="total-unit">원</span>
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="noteCard" style="display:none;">
+      <div class="card-head">
+        <div class="card-head-num">3</div>
+        <div class="card-head-title">비고 <span style="font-size:12px;font-weight:400;opacity:0.7;">(선택)</span></div>
+      </div>
+      <div class="card-body">
+        <textarea id="note" placeholder="추가로 전달할 사항이 있으면 입력해 주세요."></textarea>
+      </div>
+    </div>
+
+    <div class="submit-area">
+      <button type="submit" class="btn-submit" id="submitBtn">
+        <span>📨</span> <span id="submitBtnText">신청서 제출하기</span>
+      </button>
+      <div class="submit-note">제출 후 공문으로 별도 발송해 주세요.</div>
+    </div>
+  </form>
+</div>
+
+<!-- ===== 화면: 완료 ===== -->
+<div id="screenResult" class="form-wrap" style="display:none;">
+  <div class="card">
+    <div class="card-body" style="text-align:center;padding:60px 24px;">
+      <div class="result-icon" id="resultIcon">✅</div>
+      <div class="result-title" id="resultTitle">신청이 완료되었습니다</div>
+      <div class="result-sub" id="resultSub"></div>
+      <div class="result-seq" id="resultSeq"></div>
+      <div class="result-actions">
+        <button class="btn-secondary" onclick="App.reset()">다시 작성하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/form.js"></script>
+<script src="js/print.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>

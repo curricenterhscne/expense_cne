@@ -95,7 +95,8 @@ function verifyTeacher(courseCode, last4) {
   return {
     success: true,
     token: token,
-    existing: existing
+    existing: existing,
+    teacherContact: contact  // 본인 확인 후이므로 연락처 반환
   };
 }
 
