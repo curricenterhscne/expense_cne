@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>수업운영비 신청 시스템 — 담당자 운영 매뉴얼</title>
+<style>
+  @page { size: A4; margin: 15mm; }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Malgun Gothic', '맑은 고딕', sans-serif;
+    font-size: 13px; line-height: 1.8; color: #1a1a2e;
+    max-width: 740px; margin: 0 auto; padding: 20px;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact;
+  }
+
+  /* 헤더 */
+  .header {
+    background: #0d2444; color: #fff; padding: 20px 24px;
+    border-bottom: 4px solid #c9a84c; margin-bottom: 24px;
+  }
+  .header h1 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .header p { font-size: 12px; color: rgba(255,255,255,0.6); }
+
+  /* 섹션 */
+  h2 {
+    background: #0d2444; color: #fff; font-size: 14px;
+    padding: 8px 16px; margin: 28px 0 14px; font-weight: 700;
+  }
+  h3 {
+    background: #1a3a5c; color: #fff; font-size: 13px;
+    padding: 5px 14px; margin: 18px 0 10px; font-weight: 700;
+  }
+
+  /* 테이블 */
+  table {
+    width: 100%; border-collapse: collapse; margin: 10px 0;
+    font-size: 12.5px;
+  }
+  th, td {
+    border: 1px solid #d4c9b0; padding: 6px 10px;
+    vertical-align: top; text-align: left;
+  }
+  th {
+    background: #f5f2ec; color: #1a3a5c; font-weight: 700;
+    white-space: nowrap;
+  }
+  td code {
+    background: #eee; padding: 1px 5px; border-radius: 3px;
+    font-size: 12px; color: #c0392b;
+  }
+
+  /* 리스트 */
+  ul, ol { padding-left: 22px; margin: 8px 0; }
+  li { margin: 4px 0; }
+  li strong { color: #1e5fa8; }
+
+  /* 안내 박스 */
+  .tip {
+    background: #f5f2ec; border-left: 4px solid #c9a84c;
+    padding: 10px 14px; margin: 10px 0; font-size: 12.5px;
+  }
+  .warn {
+    background: rgba(192,57,43,0.06); border-left: 4px solid #c0392b;
+    padding: 10px 14px; margin: 10px 0; font-size: 12.5px; color: #7a2520;
+  }
+  .warn strong { color: #c0392b; }
+
+  /* 구분선 */
+  hr {
+    border: none; border-top: 1px solid #d4c9b0; margin: 24px 0;
+  }
+
+  /* 순서 목록 */
+  .steps { counter-reset: step; padding-left: 0; list-style: none; }
+  .steps li {
+    counter-increment: step; position: relative;
+    padding: 6px 0 6px 32px; border-bottom: 1px solid #e8e0d0;
+  }
+  .steps li::before {
+    content: counter(step);
+    position: absolute; left: 0; top: 6px;
+    width: 22px; height: 22px; background: #c9a84c; color: #0d2444;
+    border-radius: 50%; font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .steps li:last-child { border-bottom: none; }
+
+  /* 푸터 */
+  .footer {
+    margin-top: 28px; padding: 10px 14px;
+    background: #0d2444; color: rgba(255,255,255,0.5);
+    font-size: 11px; text-align: center;
+  }
+
+  @media print {
+    body { padding: 0; }
+    h2 { break-before: auto; break-after: avoid; }
+    h3 { break-after: avoid; }
+    table { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>수업운영비 신청 시스템 — 담당자 운영 매뉴얼</h1>
+  <p>참학력 온라인 공동교육과정 · 충청남도교육청 중등교육과</p>
+</div>
+
+<h2>1. 학기 시작 전 준비</h2>
+
+<h3>1-1. 설정 시트 갱신</h3>
+
+<p>스프레드시트의 <code>설정</code> 시트에서 다음 값을 확인·수정합니다.</p>
+
+<table>
+  <tr><th>키</th><th>설명</th><th>예시</th></tr>
+  <tr><td>학기명</td><td>헤더·집계표 제목에 표시</td><td><code>2026학년도 2학기</code></td></tr>
+  <tr><td>과정명</td><td>교육과정 이름</td><td><code>참학력 온라인 공동교육과정</code></td></tr>
+  <tr><td>거점학교명</td><td>거점학교</td><td><code>충남온라인학교</code></td></tr>
+  <tr><td>학기코드</td><td>PDF 파일명·보관사본 이름에 사용</td><td><code>26-2</code></td></tr>
+  <tr><td>인당단가</td><td>수강인원 × 이 금액 = 한도</td><td><code>20000</code></td></tr>
+  <tr><td>신청시작일</td><td>안내용 (검증에는 사용하지 않음)</td><td><code>2026-09-01</code></td></tr>
+  <tr><td>신청마감일</td><td>안내용</td><td><code>2026-09-30</code></td></tr>
+  <tr><td>접수상태</td><td><code>접수</code> 또는 <code>마감</code></td><td><code>접수</code></td></tr>
+  <tr><td>담당자연락처</td><td>내부 참고용 (교사에게 노출되지 않음)</td><td><code>041-640-7221</code></td></tr>
+  <tr><td>보관폴더ID</td><td>새 학기 시작 시 사본 저장 위치 (Google Drive 폴더 ID)</td><td></td></tr>
+  <tr><td>안내문구</td><td>추가 안내가 필요할 때 (선택)</td><td></td></tr>
+</table>
+
+<div class="warn">
+  <strong>접수상태를 <code>접수</code>로 설정해야 교사가 신청할 수 있습니다.</strong><br>
+  설정을 변경하면 캐시(5분) 만료 후 반영됩니다.
+</div>
+
+<h3>1-2. 강좌목록 붙여넣기</h3>
+
+<p><code>강좌목록</code> 시트의 2행부터 데이터를 붙여넣습니다.</p>
+
+<p><strong>붙여넣기 전 확인사항:</strong></p>
+<ul>
+  <li><strong>헤더 행(1행)을 지우지 마세요.</strong> 코드가 헤더로 열을 찾습니다.</li>
+  <li><strong>수강인원 열에 <code>#N/A</code>가 없는지</strong> 확인하세요. <code>#N/A</code>가 있으면 해당 강좌는 교사가 선택할 수 없고 "수강인원 데이터 오류" 메시지가 표시됩니다.</li>
+  <li><strong>강좌코드가 중복되지 않는지</strong> 확인하세요. 같은 강좌코드가 두 행 이상 있으면 첫 번째만 인식됩니다.</li>
+  <li><strong>교사 연락처</strong>가 빠짐없이 입력되어 있는지 확인하세요. 연락처가 없으면 뒤 4자리 인증이 불가합니다.</li>
+</ul>
+
+<h3>1-3. 동작 확인</h3>
+
+<p>스프레드시트 메뉴 <code>📊 운영비 관리</code> → <code>설정 확인</code>을 실행하여 설정값이 정상인지 확인합니다.</p>
+
+<hr>
+
+<h2>2. 접수 기간 중</h2>
+
+<h3>2-1. 교사 안내</h3>
+
+<p>신청 링크를 교사에게 안내합니다. <strong>URL은 학기가 바뀌어도 변경되지 않습니다.</strong></p>
+
+<p>교사에게 전달할 사항:</p>
+<ul>
+  <li>온라인 제출 후 <strong>PDF를 공문으로도 별도 제출</strong>해야 접수 처리됨</li>
+  <li>교사용 매뉴얼을 인쇄 배포하거나 링크로 안내</li>
+</ul>
+
+<h3>2-2. 미제출 독촉</h3>
+
+<p>메뉴 → <code>미제출 목록 생성</code>을 실행하면 <code>미제출</code> 시트가 생성됩니다.</p>
+
+<table>
+  <tr><th>구역</th><th>의미</th></tr>
+  <tr><td><strong>미제출</strong></td><td>온라인 신청 자체가 없는 강좌</td></tr>
+  <tr><td><strong>공문 미접수</strong></td><td>온라인 제출은 됐으나 공문이 도착하지 않은 건</td></tr>
+</table>
+
+<p>각 행에 교사 연락처가 포함되어 있으므로 바로 독촉 연락에 사용할 수 있습니다.</p>
+
+<h3>2-3. 공문 도착 시 접수상태 변경</h3>
+
+<p>공문이 도착하면 <code>신청내역</code> 시트에서 해당 강좌의 <strong>접수상태</strong> 열을 드롭다운에서 <code>접수</code>로 변경합니다.</p>
+
+<table>
+  <tr><th>상태</th><th>의미</th></tr>
+  <tr><td><code>미접수</code></td><td>온라인 제출 완료, 공문 미도착</td></tr>
+  <tr><td><code>접수</code></td><td>온라인 + 공문 모두 완료 → <strong>집계표에 포함됨</strong></td></tr>
+  <tr><td><code>보류</code></td><td>확인이 필요한 건</td></tr>
+</table>
+
+<div class="warn">
+  <strong>접수상태를 자유 입력하지 마세요.</strong> 드롭다운(미접수/접수/보류) 외의 값이 들어가면 집계에서 누락됩니다.
+</div>
+
+<hr>
+
+<h2>3. 마감 후</h2>
+
+<h3>3-1. 신청 마감</h3>
+
+<p><code>설정</code> 시트의 <code>접수상태</code>를 <strong><code>마감</code></strong>으로 변경합니다.</p>
+<p>교사가 접속하면 "신청이 마감되었습니다" 화면이 표시됩니다.</p>
+
+<h3>3-2. 집계표 생성</h3>
+
+<p>메뉴 → <code>집계표 새로고침</code>을 실행합니다.</p>
+<ul>
+  <li><strong>접수상태가 <code>접수</code>인 건만</strong> 집계에 포함됩니다.</li>
+  <li>집계표는 공문 첨부용 서식이므로 그대로 인쇄하여 사용합니다.</li>
+  <li>하단에 총합계가 자동 계산됩니다.</li>
+</ul>
+
+<div class="tip">
+  집계표는 몇 번이든 다시 생성할 수 있습니다. 기존 시트를 삭제하고 새로 만듭니다.
+</div>
+
+<hr>
+
+<h2>4. 학기 종료 — 새 학기 시작</h2>
+
+<p>메뉴 → <code>새 학기 시작</code>을 실행합니다.</p>
+
+<p><strong>실행 순서 (자동 처리):</strong></p>
+<ol class="steps">
+  <li>현재 신청 건수를 보여주고 진행 여부를 확인합니다.</li>
+  <li>현재 스프레드시트의 사본을 <code>[보관] {학기코드} 수업운영비</code> 이름으로 보관폴더에 저장합니다.</li>
+  <li>사본이 정상인지 검증합니다. <strong>실패하면 데이터를 삭제하지 않고 중단합니다.</strong></li>
+  <li>신청내역·집계표·미제출 시트를 초기화합니다.</li>
+  <li>강좌목록 2행 이하를 삭제합니다.</li>
+  <li>접수번호 시퀀스를 초기화합니다.</li>
+</ol>
+
+<p><strong>실행 후 해야 할 일:</strong></p>
+<ul>
+  <li><code>설정</code> 시트의 학기명·학기코드·신청기간을 새 학기에 맞게 수정</li>
+  <li><code>설정</code> 시트의 접수상태를 <code>접수</code>로 변경</li>
+  <li><code>강좌목록</code> 시트에 새 학기 강좌 데이터 붙여넣기</li>
+</ul>
+
+<hr>
+
+<h2>5. 문제 상황 대응</h2>
+
+<h3>웹앱이 응답하지 않을 때</h3>
+<ol>
+  <li>GAS 편집기(script.google.com)에서 스크립트가 정상인지 확인</li>
+  <li>배포 상태 확인: <code>배포 관리</code> → 활성 배포가 있는지 확인</li>
+  <li><code>clasp push</code> 후 <strong>기존 배포 편집 → 버전: 새 버전</strong>으로 재배포</li>
+  <li>그래도 안 되면 Apps Script 실행 로그에서 오류 확인</li>
+</ol>
+<div class="warn">
+  <strong>절대 「새 배포」를 하지 마세요.</strong> URL이 바뀌어 교사 안내 링크가 모두 무효화됩니다.
+</div>
+
+<h3>강좌 정보가 틀렸을 때</h3>
+<ul>
+  <li><code>강좌목록</code> 시트에서 직접 수정합니다.</li>
+  <li>수정 후 교사에게 다시 접속하여 제출하도록 안내합니다.</li>
+  <li>이미 제출된 신청은 <strong>재제출해야</strong> 변경된 정보가 반영됩니다.</li>
+</ul>
+
+<h3>교사가 인증에 실패할 때</h3>
+<ul>
+  <li>강좌목록의 교사 연락처를 확인합니다.</li>
+  <li>5회 실패하면 10분간 잠기므로 시간이 지난 후 재시도하도록 안내합니다.</li>
+  <li>연락처가 잘못되어 있으면 강좌목록에서 수정하면 됩니다.</li>
+</ul>
+
+<h3>동일 강좌에서 중복 제출이 의심될 때</h3>
+<ul>
+  <li>중복은 <strong>구조적으로 불가능</strong>합니다. 같은 강좌코드로 재제출하면 기존 행을 덮어씁니다.</li>
+  <li><code>신청내역</code> 시트의 <code>수정횟수</code> 열에서 재제출 횟수를 확인할 수 있습니다.</li>
+</ul>
+
+<div class="footer">
+  충청남도교육청 중등교육과 · 문의: 담당 장학사 041-640-7221
+</div>
+
+</body>
+</html>
