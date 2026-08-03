@@ -2,5 +2,5 @@
 // 배포 시 GAS_URL만 수정하면 됩니다.
 
 var CONFIG = {
-  GAS_URL: 'https://script.google.com/macros/s/AKfycbxMiSIWRFAAr2zYuSrxzee8mpV8IHrziqGaaU9FzW3djuea-qvYwIfVAClnvTdmsS3CGQ/exec'
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbySHgeZUSeaCvfb0bepTwbEP1F6COh30DOFql3B8UQycHoUVz0fhhJ1s_1CqB3HhiYZrQ/exec'
 };
