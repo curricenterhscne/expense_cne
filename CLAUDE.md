@@ -58,27 +58,32 @@ expense_cne/
 │   ├─ css/
 │   │   ├─ style.css           화면용
 │   │   └─ print.css           인쇄(PDF)용
-│   └─ js/
-│       ├─ config.js           GAS URL 등 상수
-│       ├─ api.js              GAS 통신
-│       ├─ auth.js             연락처 뒷 4자리 인증
-│       ├─ form.js             폼 렌더·검증
-│       ├─ print.js            인쇄 뷰 생성
-│       └─ main.js             진입점·화면 전환
+│   ├─ js/
+│   │   ├─ config.js           GAS URL 등 상수
+│   │   ├─ api.js              GAS 통신 (CORS 우회 포함)
+│   │   ├─ auth.js             연락처 뒷 4자리 인증
+│   │   ├─ form.js             폼 렌더·검증·제출
+│   │   ├─ print.js            인쇄 뷰 생성·PDF 저장
+│   │   └─ main.js             진입점·화면 전환
+│   └─ manual/
+│       ├─ teacher.html        교사용 매뉴얼 (A4 인쇄 가능)
+│       └─ admin.html          담당자용 운영 매뉴얼
 ├─ gas/                        ← clasp 관리 (스프레드시트 바인딩)
-│   ├─ appsscript.json
-│   ├─ Config.gs               설정 시트 읽기
+│   ├─ .clasp.json             clasp 프로젝트 설정
+│   ├─ appsscript.json         GAS 매니페스트
+│   ├─ Constants.gs            시트명·열 인덱스 상수
+│   ├─ Config.gs               설정 시트 읽기·캐싱 (5분)
 │   ├─ Api.gs                  doGet / doPost 라우팅
-│   ├─ Courses.gs              강좌 목록 조회
-│   ├─ Auth.gs                 뒷 4자리 검증·잠금
-│   ├─ Submit.gs               신청 upsert
-│   ├─ Summary.gs              집계표·미제출 목록
-│   ├─ Term.gs                 새 학기 시작
-│   └─ Menu.gs                 onOpen 메뉴
+│   ├─ Courses.gs              강좌 목록 조회 (연락처 제외)
+│   ├─ Auth.gs                 뒷 4자리 검증·잠금·토큰
+│   ├─ Submit.gs               신청 upsert (강좌코드 기준)
+│   ├─ Summary.gs              집계표·미제출 목록 생성
+│   ├─ Term.gs                 새 학기 시작 (보관→초기화)
+│   └─ Menu.gs                 onOpen 커스텀 메뉴
 ├─ legacy/                     ← 기존 구현 (참고용, 수정 금지)
 │   ├─ code.gs
 │   └─ index.html
-└─ manual/                     ← 매뉴얼 (교사용·담당자용)
+└─ .gitignore
 ```
 
 ---
@@ -264,3 +269,35 @@ cd docs && python3 -m http.server 8000
 6. 재제출 후 `접수상태` 값이 보존되는지
 7. `설정`의 `접수상태`를 `마감`으로 변경 → 폼 잠김
 8. 인쇄 미리보기에서 A4 1장에 들어가는지
+
+---
+
+## 구현 현황 (2026-08-03 기준)
+
+모든 Phase 구현 완료. 배포·테스트 단계.
+
+| Phase | 내용 | 상태 |
+|---|---|---|
+| 0 | 저장소 골격 생성 | ✅ 완료 |
+| 1 | 설정 계층 + GAS 라우팅 (Constants, Config, Api, Menu) | ✅ 완료 |
+| 2 | 강좌 조회 + 신청 제출 upsert (Courses, Submit) | ✅ 완료 |
+| 3 | 교사 본인 확인 — 뒤 4자리 + 1회용 토큰 (Auth) | ✅ 완료 |
+| 4 | 프런트엔드 이식 — 990줄 단일 파일 → 7개 모듈 분리 | ✅ 완료 |
+| 5 | 인쇄(PDF) — window.print() + print.css | ✅ 완료 |
+| 6 | 담당자 관리 — 집계표, 미제출 목록, 새 학기 시작 | ✅ 완료 |
+| 7 | 매뉴얼 (교사용·담당자용 HTML) + README 갱신 | ✅ 완료 |
+
+### 배포 정보
+
+- **GitHub Pages**: https://curricenterhscne.github.io/expense_cne/
+- **교사용 매뉴얼**: https://curricenterhscne.github.io/expense_cne/manual/teacher.html
+- **담당자용 매뉴얼**: https://curricenterhscne.github.io/expense_cne/manual/admin.html
+- **GAS 웹앱 URL**: `docs/js/config.js`의 `GAS_URL` 참조
+- **GAS 스크립트 ID**: `gas/.clasp.json`의 `scriptId` 참조
+
+### 알려진 이슈·주의사항
+
+- `clasp push` 후 반드시 **기존 배포 편집 → 새 버전**으로 배포해야 코드가 반영됨
+- `새 배포`를 하면 URL이 바뀌므로 절대 사용 금지
+- `print.css`는 `media="print"`로 로드되므로, 인쇄 영역 숨김(`.print-sheet { display: none }`)은 `style.css`에 있어야 함
+- GAS 설정 캐시는 5분 — 설정 변경 후 최대 5분 대기 필요
