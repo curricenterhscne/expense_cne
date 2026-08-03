@@ -1,6 +1,7 @@
 /* 화면 표시용 스타일시트 — legacy 디자인을 그대로 유지합니다 */
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+.print-sheet { display: none; }
 :root {
   --navy:   #0d2444;
   --navy2:  #1a3a5c;
