@@ -9,6 +9,14 @@ function doGet(e) {
     var action = (e && e.parameter && e.parameter.action) || '';
 
     switch (action) {
+      case 'init':
+        // config + courses를 한 번에 반환 (네트워크 왕복 1회로 단축)
+        return jsonResponse({
+          success: true,
+          data: getPublicConfig(),
+          courses: getCourses()
+        });
+
       case 'config':
         return jsonResponse({ success: true, data: getPublicConfig() });
 

@@ -14,28 +14,23 @@ var App = {
       Form.submit();
     });
 
-    App.showLoading('설정을 불러오는 중...');
+    App.showLoading('불러오는 중...');
 
-    Api.fetchConfig()
+    Api.fetchInit()
       .then(function(res) {
-        if (!res.success) throw new Error(res.error || '설정 로드 실패');
+        App.hideLoading();
+        if (!res.success) throw new Error(res.error || '서버 데이터 로드 실패');
+
         App.config = res.data;
         App.renderHeader();
         App.renderNotice();
 
         // 마감 여부 확인
         if (App.config['접수상태'] === '마감') {
-          App.hideLoading();
           App.showScreen('closed');
           return;
         }
 
-        return Api.fetchCourses();
-      })
-      .then(function(res) {
-        if (!res) return; // 마감
-        App.hideLoading();
-        if (!res.success) throw new Error(res.error || '강좌 로드 실패');
         Auth.renderCourseList(res.courses);
         App.showScreen('auth');
       })

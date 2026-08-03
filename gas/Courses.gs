@@ -10,6 +10,13 @@
  * @returns {Object} { success, courses }
  */
 function getCourses() {
+  // 캐시 확인 (2분) — 강좌 목록은 학기 중 거의 변하지 않음
+  var cache = CacheService.getScriptCache();
+  var cached = cache.get('coursesList');
+  if (cached) {
+    return JSON.parse(cached);
+  }
+
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(SHEET.강좌목록);
   if (!sheet) {
@@ -97,6 +104,9 @@ function getCourses() {
 
     courses.push(course);
   }
+
+  // 캐시 저장 (2분)
+  cache.put('coursesList', JSON.stringify(courses), 120);
 
   return courses;
 }

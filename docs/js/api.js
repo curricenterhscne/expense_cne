@@ -3,15 +3,9 @@
 
 var Api = {
 
-  /** GET: 설정값 조회 */
-  fetchConfig: function() {
-    return fetch(CONFIG.GAS_URL + '?action=config')
-      .then(function(res) { return res.json(); });
-  },
-
-  /** GET: 강좌 목록 조회 */
-  fetchCourses: function() {
-    return fetch(CONFIG.GAS_URL + '?action=courses')
+  /** GET: 설정 + 강좌 목록을 한 번에 조회 (네트워크 1회) */
+  fetchInit: function() {
+    return fetch(CONFIG.GAS_URL + '?action=init')
       .then(function(res) { return res.json(); });
   },
 
