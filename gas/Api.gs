@@ -34,11 +34,10 @@ function doPost(e) {
 
     switch (action) {
       case 'verify':
-        // Phase 3에서 구현
-        return jsonResponse({ success: false, error: '인증 기능은 아직 구현되지 않았습니다.' });
+        return jsonResponse(verifyTeacher(body.courseCode, body.last4));
 
       case 'submit':
-        // TODO: Phase 3에서 인증 토큰 검증 추가
+        consumeToken(body.token, body.courseCode);
         return jsonResponse(submitApplication(body));
 
       default:
