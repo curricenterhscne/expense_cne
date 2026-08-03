@@ -6,6 +6,9 @@
  * - 제목·거점학교명은 설정 시트에서 읽음
  * - 병합셀 구조·색상·행 높이는 legacy/code.gs 서식 그대로 유지
  *   (공문 첨부용으로 확정된 서식이므로 임의 변경 금지)
+ *
+ * ★ 성능 최적화: 값 배열을 메모리에서 조립 → setValues() 1회로 쓰고,
+ *   서식은 범위 단위 일괄 적용 (개별 셀 호출 최소화)
  */
 function buildSummarySheet() {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
@@ -22,59 +25,6 @@ function buildSummarySheet() {
   if (sumSheet) ss.deleteSheet(sumSheet);
   sumSheet = ss.insertSheet(SHEET.집계표);
 
-  // ── 컬럼 너비 설정
-  sumSheet.setColumnWidth(1, 45);   // 연번
-  sumSheet.setColumnWidth(2, 110);  // 거점학교
-  sumSheet.setColumnWidth(3, 120);  // 예산신청교
-  sumSheet.setColumnWidth(4, 110);  // 강좌명
-  sumSheet.setColumnWidth(5, 80);   // 지도강사명
-  sumSheet.setColumnWidth(6, 65);   // 희망여부
-  sumSheet.setColumnWidth(7, 130);  // 구분
-  sumSheet.setColumnWidth(8, 230);  // 산출식
-  sumSheet.setColumnWidth(9, 90);   // 금액
-  sumSheet.setColumnWidth(10, 90);  // 총소요예산
-
-  // ── 제목 행 (설정 시트 값 사용)
-  sumSheet.setRowHeight(1, 30);
-  var titleText = config['학기명'] + ' 「' + config['과정명'] + '」 수업운영비 신청서(서식)';
-  var titleRange = sumSheet.getRange(1, 1, 1, 10);
-  titleRange.merge();
-  titleRange.setValue(titleText);
-  titleRange.setFontSize(12).setFontWeight('bold').setHorizontalAlignment('center').setVerticalAlignment('middle');
-  titleRange.setBackground('#0d2444').setFontColor('#ffffff');
-
-  // ── 헤더 행 (2행: 상단, 3행: 운영소요예산 하위)
-  sumSheet.setRowHeight(2, 36);
-  sumSheet.setRowHeight(3, 24);
-
-  // 병합 헤더들
-  sumSheet.getRange(2, 1, 2, 1).merge().setValue('연번');
-  sumSheet.getRange(2, 2, 2, 1).merge().setValue('거점학교');
-  sumSheet.getRange(2, 3, 2, 1).merge().setValue('예산신청교\n(강사 소속교)');
-  sumSheet.getRange(2, 4, 2, 1).merge().setValue('강좌명');
-  sumSheet.getRange(2, 5, 2, 1).merge().setValue('지도강사명');
-  sumSheet.getRange(2, 6, 2, 1).merge().setValue('희망여부');
-  sumSheet.getRange(2, 7, 1, 3).merge().setValue('운영 소요예산');
-  sumSheet.getRange(3, 7, 1, 1).setValue('구분');
-  sumSheet.getRange(3, 8, 1, 1).setValue('산출식');
-  sumSheet.getRange(3, 9, 1, 1).setValue('금액\n(단위: 원)');
-  sumSheet.getRange(2, 10, 2, 1).merge().setValue('총 소요예산\n(단위:원)');
-
-  // 헤더 스타일
-  var headerRange = sumSheet.getRange(2, 1, 2, 10);
-  headerRange.setBackground('#1a3a5c');
-  headerRange.setFontColor('#ffffff');
-  headerRange.setFontWeight('bold');
-  headerRange.setHorizontalAlignment('center');
-  headerRange.setVerticalAlignment('middle');
-  headerRange.setWrap(true);
-  headerRange.setBorder(true, true, true, true, true, true, '#ffffff', SpreadsheetApp.BorderStyle.SOLID);
-
-  // 예산신청교 헤더 글자색 연빨간색
-  sumSheet.getRange(2, 3).setFontColor('#ffcccc');
-
-  sumSheet.setFrozenRows(3);
-
   // ── 신청내역 데이터 읽기
   var srcData = srcSheet.getDataRange().getValues();
   if (srcData.length < 2) {
@@ -82,9 +32,8 @@ function buildSummarySheet() {
     return;
   }
 
-  // 접수상태 === '접수' 인 행만 필터링 (0-based 인덱스: COL.접수상태 - 1)
-  var allRows = srcData.slice(1);
-  var rows = allRows.filter(function(row) {
+  // 접수상태 === '접수' 인 행만 필터링
+  var rows = srcData.slice(1).filter(function(row) {
     return String(row[COL.접수상태 - 1]).trim() === '접수';
   });
 
@@ -94,9 +43,19 @@ function buildSummarySheet() {
     return;
   }
 
-  var writeRow = 4; // 데이터 시작 행
-  var seq = 1;
+  // ── 1단계: 메모리에서 전체 데이터 조립
   var hubSchool = config['거점학교명'] || '충남온라인학교';
+  var allValues = [];   // 2D 배열 (데이터 영역 전체)
+  var merges = [];       // { row, col, rowSpan, colSpan } — 0-based from data start
+  var itemRowBgs = [];   // { row, bg } — 항목 홀짝 배경
+  var noExpenseRows = []; // 희망안함 행 (구분~금액 병합+회색)
+  var totalAmounts = [];  // { row, amount } — 총소요예산 값
+  var blockBorders = [];  // 블록 하단 굵은 선 행
+  var schoolRows = [];    // 예산신청교 노란 배경
+  var rowHeights = [];    // { row, height }
+
+  var seq = 1;
+  var grandTotal = 0;
 
   rows.forEach(function(row) {
     var wantsExpense = String(row[COL.운영비희망여부 - 1]).trim() === '희망';
@@ -105,12 +64,13 @@ function buildSummarySheet() {
                       String(row[COL.과목명 - 1]).trim()).trim();
     var teacherName = String(row[COL.담당교사 - 1]).trim();
     var wantsStr = wantsExpense ? '희망' : '희망\n하지않음';
-    var total = row[COL.총소요예산 - 1] || 0;
+    var total = Number(row[COL.총소요예산 - 1]) || 0;
+    grandTotal += total;
 
-    // 항목 목록 추출
+    // 항목 추출
     var items = [];
     for (var i = 0; i < MAX_ITEMS; i++) {
-      var baseCol = COL.항목시작 - 1 + i * 3; // 0-based
+      var baseCol = COL.항목시작 - 1 + i * 3;
       var cat = String(row[baseCol] || '').trim();
       var formula = String(row[baseCol + 1] || '').trim();
       var amount = row[baseCol + 2];
@@ -119,109 +79,173 @@ function buildSummarySheet() {
       }
     }
 
-    // 희망하지 않으면 항목 1줄로
     var rowCount = (!wantsExpense || items.length === 0) ? 1 : items.length;
+    var startIdx = allValues.length; // 현재 데이터 배열 내 인덱스
 
-    // 행 높이
+    // 행 높이 기록
     for (var r = 0; r < rowCount; r++) {
-      sumSheet.setRowHeight(writeRow + r, 52);
+      rowHeights.push({ row: startIdx + r, height: 52 });
     }
 
-    // 연번~희망여부, 총소요예산: rowCount만큼 병합
-    if (rowCount > 1) {
-      sumSheet.getRange(writeRow, 1, rowCount, 1).merge();
-      sumSheet.getRange(writeRow, 2, rowCount, 1).merge();
-      sumSheet.getRange(writeRow, 3, rowCount, 1).merge();
-      sumSheet.getRange(writeRow, 4, rowCount, 1).merge();
-      sumSheet.getRange(writeRow, 5, rowCount, 1).merge();
-      sumSheet.getRange(writeRow, 6, rowCount, 1).merge();
-      sumSheet.getRange(writeRow, 10, rowCount, 1).merge();
-    }
-
-    // 공통 정보 입력
-    sumSheet.getRange(writeRow, 1).setValue(seq);
-    sumSheet.getRange(writeRow, 2).setValue(hubSchool);
-    sumSheet.getRange(writeRow, 3).setValue(schoolName);
-    sumSheet.getRange(writeRow, 4).setValue(courseName);
-    sumSheet.getRange(writeRow, 5).setValue(teacherName);
-    sumSheet.getRange(writeRow, 6).setValue(wantsStr);
-
-    // 총소요예산
-    var totalCell = sumSheet.getRange(writeRow, 10);
-    totalCell.setValue(total);
-    totalCell.setNumberFormat('#,##0');
-    totalCell.setFontWeight('bold');
-    totalCell.setFontColor('#1e5fa8');
-
-    // 운영비 항목 입력
+    // 첫 행에 공통 정보, 나머지 행은 빈칸 (병합될 영역)
     if (!wantsExpense || items.length === 0) {
-      // 희망 안 함 — 구분~금액 빈칸
-      sumSheet.getRange(writeRow, 7, 1, 3).merge().setValue('').setBackground('#f5f5f5');
+      allValues.push([seq, hubSchool, schoolName, courseName, teacherName, wantsStr, '', '', '', total]);
+      noExpenseRows.push(startIdx);
     } else {
-      items.forEach(function(item, i) {
-        var r = writeRow + i;
-        sumSheet.getRange(r, 7).setValue(item.cat);
-        sumSheet.getRange(r, 8).setValue(item.formula);
-        var amtCell = sumSheet.getRange(r, 9);
-        amtCell.setValue(item.amount);
-        amtCell.setNumberFormat('#,##0');
-        amtCell.setHorizontalAlignment('right');
+      for (var j = 0; j < items.length; j++) {
+        allValues.push([
+          j === 0 ? seq : '',
+          j === 0 ? hubSchool : '',
+          j === 0 ? schoolName : '',
+          j === 0 ? courseName : '',
+          j === 0 ? teacherName : '',
+          j === 0 ? wantsStr : '',
+          items[j].cat,
+          items[j].formula,
+          items[j].amount,
+          j === 0 ? total : ''
+        ]);
+        // 항목 홀짝 배경
+        itemRowBgs.push({ row: startIdx + j, bg: j % 2 === 0 ? '#ffffff' : '#f7f5f0' });
+      }
+    }
 
-        // 홀짝 행 배경
-        var bg = i % 2 === 0 ? '#ffffff' : '#f7f5f0';
-        sumSheet.getRange(r, 7, 1, 3).setBackground(bg);
+    // 병합 정보 (rowCount > 1일 때)
+    if (rowCount > 1) {
+      [0, 1, 2, 3, 4, 5, 9].forEach(function(col) { // 연번~희망여부 + 총소요예산
+        merges.push({ row: startIdx, col: col, rowSpan: rowCount, colSpan: 1 });
       });
     }
 
-    // ── 행 전체 스타일
-    var blockRange = sumSheet.getRange(writeRow, 1, rowCount, 10);
-    blockRange.setVerticalAlignment('middle');
-    blockRange.setWrap(true);
-    blockRange.setBorder(true, true, true, true, false, false,
-      '#c0b898', SpreadsheetApp.BorderStyle.SOLID);
-
-    // 블록 하단 굵은 경계선
-    sumSheet.getRange(writeRow + rowCount - 1, 1, 1, 10)
-      .setBorder(null, null, true, null, null, null,
-        '#888877', SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
-
-    // 정렬
-    sumSheet.getRange(writeRow, 1, rowCount, 1).setHorizontalAlignment('center');
-    sumSheet.getRange(writeRow, 2, rowCount, 2).setHorizontalAlignment('center');
-    sumSheet.getRange(writeRow, 5, rowCount, 2).setHorizontalAlignment('center');
-    sumSheet.getRange(writeRow, 10, rowCount, 1).setHorizontalAlignment('right');
+    // 총소요예산 위치
+    totalAmounts.push({ row: startIdx, amount: total });
 
     // 예산신청교 노란 배경
-    sumSheet.getRange(writeRow, 3, rowCount, 1).setBackground('#ffff99');
+    for (var k = 0; k < rowCount; k++) {
+      schoolRows.push(startIdx + k);
+    }
 
-    writeRow += rowCount;
+    // 블록 하단 경계선
+    blockBorders.push(startIdx + rowCount - 1);
+
     seq++;
   });
 
-  // ── 합계 행
-  sumSheet.setRowHeight(writeRow, 30);
-  var totalRow = sumSheet.getRange(writeRow, 1, 1, 10);
-  totalRow.setBackground('#1a3a5c');
-  totalRow.setFontColor('#ffffff');
-  totalRow.setFontWeight('bold');
+  // ── 2단계: 시트 구조 설정 (열 너비, 헤더)
+  var colWidths = [45, 110, 120, 110, 80, 65, 130, 230, 90, 90];
+  for (var w = 0; w < colWidths.length; w++) {
+    sumSheet.setColumnWidth(w + 1, colWidths[w]);
+  }
 
-  // 안내문구 — 설정 시트 값 사용
+  // 제목 행 (1행)
+  sumSheet.setRowHeight(1, 30);
+  var titleText = config['학기명'] + ' 「' + config['과정명'] + '」 수업운영비 신청서(서식)';
+  var titleRange = sumSheet.getRange(1, 1, 1, 10);
+  titleRange.merge().setValue(titleText);
+  titleRange.setFontSize(12).setFontWeight('bold').setHorizontalAlignment('center')
+    .setVerticalAlignment('middle').setBackground('#0d2444').setFontColor('#ffffff');
+
+  // 헤더 (2~3행)
+  sumSheet.setRowHeight(2, 36);
+  sumSheet.setRowHeight(3, 24);
+
+  var headerValues = [
+    ['연번', '거점학교', '예산신청교\n(강사 소속교)', '강좌명', '지도강사명', '희망여부', '운영 소요예산', '', '', '총 소요예산\n(단위:원)'],
+    ['', '', '', '', '', '', '구분', '산출식', '금액\n(단위: 원)', '']
+  ];
+  sumSheet.getRange(2, 1, 2, 10).setValues(headerValues);
+
+  // 헤더 병합
+  [[2,1,2,1],[2,2,2,1],[2,3,2,1],[2,4,2,1],[2,5,2,1],[2,6,2,1],[2,7,1,3],[2,10,2,1]].forEach(function(m) {
+    sumSheet.getRange(m[0], m[1], m[2], m[3]).merge();
+  });
+
+  // 헤더 스타일
+  var headerRange = sumSheet.getRange(2, 1, 2, 10);
+  headerRange.setBackground('#1a3a5c').setFontColor('#ffffff').setFontWeight('bold')
+    .setHorizontalAlignment('center').setVerticalAlignment('middle').setWrap(true)
+    .setBorder(true, true, true, true, true, true, '#ffffff', SpreadsheetApp.BorderStyle.SOLID);
+  sumSheet.getRange(2, 3).setFontColor('#ffcccc');
+  sumSheet.setFrozenRows(3);
+
+  // ── 3단계: 데이터 일괄 쓰기
+  var dataStartRow = 4;
+  if (allValues.length > 0) {
+    sumSheet.getRange(dataStartRow, 1, allValues.length, 10).setValues(allValues);
+  }
+
+  // ── 4단계: 서식 일괄 적용
+
+  // 행 높이
+  rowHeights.forEach(function(rh) {
+    sumSheet.setRowHeight(dataStartRow + rh.row, rh.height);
+  });
+
+  // 전체 데이터 영역 기본 스타일
+  var dataRange = sumSheet.getRange(dataStartRow, 1, allValues.length, 10);
+  dataRange.setVerticalAlignment('middle').setWrap(true);
+
+  // 정렬: 연번(중앙), 거점학교~예산신청교(중앙), 지도강사~희망(중앙), 총소요예산(오른쪽)
+  sumSheet.getRange(dataStartRow, 1, allValues.length, 1).setHorizontalAlignment('center');
+  sumSheet.getRange(dataStartRow, 2, allValues.length, 2).setHorizontalAlignment('center');
+  sumSheet.getRange(dataStartRow, 5, allValues.length, 2).setHorizontalAlignment('center');
+  sumSheet.getRange(dataStartRow, 9, allValues.length, 1).setHorizontalAlignment('right');
+  sumSheet.getRange(dataStartRow, 10, allValues.length, 1).setHorizontalAlignment('right');
+
+  // 금액 서식
+  sumSheet.getRange(dataStartRow, 9, allValues.length, 2).setNumberFormat('#,##0');
+
+  // 병합 처리
+  merges.forEach(function(m) {
+    sumSheet.getRange(dataStartRow + m.row, m.col + 1, m.rowSpan, m.colSpan).merge();
+  });
+
+  // 희망안함 행: 구분~금액 병합 + 회색 배경
+  noExpenseRows.forEach(function(idx) {
+    sumSheet.getRange(dataStartRow + idx, 7, 1, 3).merge().setBackground('#f5f5f5');
+  });
+
+  // 항목 홀짝 배경
+  itemRowBgs.forEach(function(rb) {
+    sumSheet.getRange(dataStartRow + rb.row, 7, 1, 3).setBackground(rb.bg);
+  });
+
+  // 총소요예산 스타일
+  totalAmounts.forEach(function(ta) {
+    sumSheet.getRange(dataStartRow + ta.row, 10).setFontWeight('bold').setFontColor('#1e5fa8');
+  });
+
+  // 예산신청교 노란 배경
+  schoolRows.forEach(function(idx) {
+    sumSheet.getRange(dataStartRow + idx, 3).setBackground('#ffff99');
+  });
+
+  // 블록 하단 굵은 경계선
+  blockBorders.forEach(function(idx) {
+    sumSheet.getRange(dataStartRow + idx, 1, 1, 10)
+      .setBorder(null, null, true, null, null, null,
+        '#888877', SpreadsheetApp.BorderStyle.SOLID_MEDIUM);
+  });
+
+  // 전체 테두리 (블록 단위 대신 전체에 적용)
+  dataRange.setBorder(true, true, true, true, true, true,
+    '#c0b898', SpreadsheetApp.BorderStyle.SOLID);
+
+  // ── 합계 행
+  var totalRow = dataStartRow + allValues.length;
+  sumSheet.setRowHeight(totalRow, 30);
+  var totalRowRange = sumSheet.getRange(totalRow, 1, 1, 10);
+  totalRowRange.setBackground('#1a3a5c').setFontColor('#ffffff').setFontWeight('bold');
+
   var unitPrice = config['인당단가'] || 20000;
   var footNote = '※ 작성시 참고사항: 운영비는 수업 교사(강사) 소속교로 교부 / 수강인원 × ' +
     unitPrice.toLocaleString() + '원 한도 / 실험실습 재료 초과 시 담당장학사 041-640-7221 문의';
-  sumSheet.getRange(writeRow, 1, 1, 9).merge().setValue(footNote);
-  sumSheet.getRange(writeRow, 1, 1, 9).setFontSize(9)
-    .setHorizontalAlignment('left').setWrap(true);
+  sumSheet.getRange(totalRow, 1, 1, 9).merge().setValue(footNote);
+  sumSheet.getRange(totalRow, 1).setFontSize(9).setHorizontalAlignment('left').setWrap(true);
 
-  // 총합계
-  var grandTotal = rows.reduce(function(s, r) {
-    return s + (Number(r[COL.총소요예산 - 1]) || 0);
-  }, 0);
-  var grandCell = sumSheet.getRange(writeRow, 10);
-  grandCell.setValue(grandTotal);
-  grandCell.setNumberFormat('#,##0');
-  grandCell.setFontColor('#e8c96a');
-  grandCell.setHorizontalAlignment('right');
+  var grandCell = sumSheet.getRange(totalRow, 10);
+  grandCell.setValue(grandTotal).setNumberFormat('#,##0')
+    .setFontColor('#e8c96a').setHorizontalAlignment('right');
 
   // 완료 메시지
   SpreadsheetApp.getUi().alert(
@@ -280,7 +304,7 @@ function buildPendingSheet() {
   };
 
   // ── 신청내역 읽기 — 강좌코드별 접수상태 맵
-  var submitMap = {}; // { courseCode: { status, ... } }
+  var submitMap = {};
   if (submitSheet) {
     var submitData = submitSheet.getDataRange().getValues();
     for (var s = 1; s < submitData.length; s++) {
@@ -294,8 +318,8 @@ function buildPendingSheet() {
   }
 
   // ── 분류
-  var notSubmitted = []; // 미제출 — 신청 자체가 없음
-  var notAccepted = [];  // 공문 미접수 — 제출됐으나 접수 아님
+  var notSubmitted = [];
+  var notAccepted = [];
   var totalCourses = courseData.length - 1;
   var submittedCount = 0;
   var acceptedCount = 0;
@@ -331,14 +355,12 @@ function buildPendingSheet() {
   if (pendSheet) ss.deleteSheet(pendSheet);
   pendSheet = ss.insertSheet(SHEET.미제출);
 
-  // 열 너비
-  pendSheet.setColumnWidth(1, 120);  // 강좌코드
-  pendSheet.setColumnWidth(2, 150);  // 과목명
-  pendSheet.setColumnWidth(3, 90);   // 담당교사
-  pendSheet.setColumnWidth(4, 140);  // 소속교
-  pendSheet.setColumnWidth(5, 130);  // 연락처
+  var colWidths = [120, 150, 90, 140, 130];
+  for (var w = 0; w < colWidths.length; w++) {
+    pendSheet.setColumnWidth(w + 1, colWidths[w]);
+  }
 
-  // ── 요약 헤더 (1행)
+  // 요약 헤더 (1행)
   var summaryText = '전체 ' + totalCourses + '개 / 제출 ' + submittedCount +
     '개 / 접수완료 ' + acceptedCount + '개';
   var summaryRange = pendSheet.getRange(1, 1, 1, 5);
@@ -349,21 +371,14 @@ function buildPendingSheet() {
   pendSheet.setRowHeight(1, 32);
 
   var writeRow = 3;
-
-  // ── 구역 1: 미제출
   writeRow = writePendingSection_(pendSheet, writeRow, '미제출 (' + notSubmitted.length + '건)',
     '온라인 신청 자체가 없는 강좌', notSubmitted);
-
-  // 구역 간 빈 행
   writeRow++;
-
-  // ── 구역 2: 공문 미접수
   writeRow = writePendingSection_(pendSheet, writeRow, '공문 미접수 (' + notAccepted.length + '건)',
     '온라인 제출은 됐으나 접수상태가 "접수"가 아닌 건', notAccepted);
 
   pendSheet.setFrozenRows(0);
 
-  // 완료 메시지
   SpreadsheetApp.getUi().alert(
     '✅ 미제출 목록 생성 완료\n\n' +
     '전체: ' + totalCourses + '개\n' +
@@ -376,52 +391,44 @@ function buildPendingSheet() {
 
 /**
  * 미제출 시트에 구역(제목 + 헤더 + 데이터)을 작성합니다.
+ * ★ 데이터를 setValues() 1회로 일괄 쓰기
  * @private
- * @param {Sheet} sheet - 대상 시트
- * @param {number} startRow - 시작 행
- * @param {string} sectionTitle - 구역 제목
- * @param {string} sectionDesc - 구역 설명
- * @param {Array} dataList - 데이터 배열
- * @returns {number} 다음 쓰기 행
  */
 function writePendingSection_(sheet, startRow, sectionTitle, sectionDesc, dataList) {
   // 구역 제목
   var titleRange = sheet.getRange(startRow, 1, 1, 5);
   titleRange.merge().setValue(sectionTitle + ' — ' + sectionDesc);
-  titleRange.setFontWeight('bold').setFontSize(10);
-  titleRange.setBackground('#1a3a5c').setFontColor('#ffffff');
+  titleRange.setFontWeight('bold').setFontSize(10)
+    .setBackground('#1a3a5c').setFontColor('#ffffff');
   sheet.setRowHeight(startRow, 28);
   startRow++;
 
   if (dataList.length === 0) {
     sheet.getRange(startRow, 1, 1, 5).merge().setValue('해당 없음');
-    sheet.getRange(startRow, 1).setHorizontalAlignment('center')
-      .setFontColor('#888888');
+    sheet.getRange(startRow, 1).setHorizontalAlignment('center').setFontColor('#888888');
     return startRow + 1;
   }
 
   // 헤더
   var headers = ['강좌코드', '과목명', '담당교사', '소속교', '연락처'];
-  var headerRow = sheet.getRange(startRow, 1, 1, 5);
-  headerRow.setValues([headers]);
-  headerRow.setFontWeight('bold').setBackground('#e8e0d0').setFontColor('#1a3a5c');
-  headerRow.setHorizontalAlignment('center');
+  sheet.getRange(startRow, 1, 1, 5).setValues([headers])
+    .setFontWeight('bold').setBackground('#e8e0d0').setFontColor('#1a3a5c')
+    .setHorizontalAlignment('center');
   startRow++;
 
-  // 데이터
+  // 데이터 일괄 쓰기
   var values = dataList.map(function(d) {
     return [d.강좌코드, d.과목명, d.담당교사, d.소속교, d.연락처];
   });
-  sheet.getRange(startRow, 1, values.length, 5).setValues(values);
+  var dataRange = sheet.getRange(startRow, 1, values.length, 5);
+  dataRange.setValues(values);
 
-  // 교차 배경색
-  for (var i = 0; i < values.length; i++) {
-    if (i % 2 === 1) {
-      sheet.getRange(startRow + i, 1, 1, 5).setBackground('#f7f5f0');
-    }
+  // 교차 배경색 — 홀수 행만 한 번에
+  for (var i = 1; i < values.length; i += 2) {
+    sheet.getRange(startRow + i, 1, 1, 5).setBackground('#f7f5f0');
   }
 
-  // 테두리
+  // 테두리 (헤더 포함 범위)
   sheet.getRange(startRow - 1, 1, values.length + 1, 5)
     .setBorder(true, true, true, true, true, true,
       '#c0b898', SpreadsheetApp.BorderStyle.SOLID);
