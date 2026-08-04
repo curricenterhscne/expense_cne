@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(clasp push:*)",
+      "Bash(wc:*)",
+      "WebFetch(domain:script.google.com)",
+      "WebFetch(domain:script.googleusercontent.com)",
+      "Bash(curl:*)"
+    ]
+  }
+}

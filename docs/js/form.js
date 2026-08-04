@@ -104,7 +104,7 @@ var Form = {
     var total = this.getCurrentTotal();
     if (total >= this.maxAmount) {
       alert('이미 최대 지원 금액(' + this.maxAmount.toLocaleString() + '원)에 도달하였습니다.\n' +
-        '실험실습 재료가 필요한 경우 담당 장학사(041-640-7221)에게 문의하세요.');
+        '실험실습 재료가 추가로 필요한 경우 충남교육청 중등교육과(041-640-7221,7224)로 문의하세요.');
       return;
     }
 
@@ -119,10 +119,10 @@ var Form = {
         '<button type="button" class="btn-remove" onclick="Form.removeItem(\'' + id + '\')">삭제</button>' +
       '</div>' +
       '<div class="expense-grid">' +
-        '<div><label>구분 <span style="color:var(--red)">*</span></label>' +
-          '<input type="text" placeholder="예) 도서/간식/수업용품" class="item-category"></div>' +
+        '<div><label>물품명<span style="color:var(--red)">*</span></label>' +
+          '<input type="text" placeholder="구체적인 물품명(예: 마이크로비트 보드)" class="item-category"></div>' +
         '<div><label>산출식</label>' +
-          '<input type="text" placeholder="예) 교재 10,000원 × 10명" class="item-formula"></div>' +
+          '<input type="text" placeholder="예) 마이크로비트 보드 20,000원 × 10명" class="item-formula"></div>' +
         '<div><label>금액 (원) <span style="color:var(--red)">*</span></label>' +
           '<input type="number" placeholder="0" min="0" step="1000" ' +
           'oninput="Form.onAmountInput(this)" class="item-amount" style="text-align:right;"></div>' +
