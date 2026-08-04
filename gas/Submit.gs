@@ -46,12 +46,15 @@ function submitApplication(payload) {
     var totalAmount = Number(payload.totalAmount) || 0;
 
     if (wantsExpense) {
-      var maxBudget = courseInfo.students * config['인당단가'];
+      var baseBudget = courseInfo.students * config['인당단가'];
+      var extraAmount = courseInfo.extraAmount || 0;
+      var maxBudget = baseBudget + extraAmount;
       if (totalAmount > maxBudget) {
+        var limitDesc = courseInfo.students + '명 × ' + config['인당단가'].toLocaleString() + '원';
+        if (extraAmount > 0) limitDesc += ' + 추가 ' + extraAmount.toLocaleString() + '원';
         throw new Error(
           '총소요예산(' + totalAmount.toLocaleString() + '원)이 한도(' +
-          maxBudget.toLocaleString() + '원 = ' + courseInfo.students + '명 × ' +
-          config['인당단가'].toLocaleString() + '원)를 초과합니다.'
+          maxBudget.toLocaleString() + '원 = ' + limitDesc + ')를 초과합니다.'
         );
       }
 
@@ -162,8 +165,9 @@ function findCourseByCode_(courseCode) {
   }
 
   var ci = {
-    courseCode: findCol(['강좌코드']),
-    students:  findCol(['수강인원', '수강 인원'])
+    courseCode:   findCol(['강좌코드']),
+    students:    findCol(['수강인원', '수강 인원']),
+    extraAmount: findCol(['추가금액', '추가 금액'])
   };
 
   if (ci.courseCode === -1) return null;
@@ -176,7 +180,14 @@ function findCourseByCode_(courseCode) {
         // 수강인원 데이터 오류 — 신청 불가
         throw new Error('강좌 "' + courseCode + '"의 수강인원 데이터에 오류가 있습니다: ' + String(rawStudents));
       }
-      return { students: numStudents };
+      // 추가금액 읽기
+      var extra = 0;
+      if (ci.extraAmount !== -1) {
+        var rawExtra = data[r][ci.extraAmount];
+        var numExtra = Number(rawExtra);
+        if (!isNaN(numExtra) && numExtra > 0) extra = numExtra;
+      }
+      return { students: numStudents, extraAmount: extra };
     }
   }
 

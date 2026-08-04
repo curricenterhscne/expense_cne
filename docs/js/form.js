@@ -11,7 +11,8 @@ var Form = {
     this.courseData = courseData;
     this.wantsExpense = null;
     this.unitPrice = config['인당단가'];
-    this.maxAmount = (courseData.students || 0) * this.unitPrice;
+    this.extraAmount = courseData.extraAmount || 0;
+    this.maxAmount = (courseData.students || 0) * this.unitPrice + this.extraAmount;
 
     // 강좌 요약 표시
     document.getElementById('courseSummary').innerHTML =
@@ -20,8 +21,9 @@ var Form = {
       ' (' + courseData.teacherSchool + ') · 수강인원 ' + courseData.students + '명';
 
     // 한도 라벨
-    document.getElementById('maxAmountLabel').textContent =
-      this.maxAmount > 0 ? this.maxAmount.toLocaleString() + '원' : '—';
+    var limitText = this.maxAmount > 0 ? this.maxAmount.toLocaleString() + '원' : '—';
+    if (this.extraAmount > 0) limitText += ' (추가 ' + this.extraAmount.toLocaleString() + '원 포함)';
+    document.getElementById('maxAmountLabel').textContent = limitText;
     document.getElementById('alertUnitPrice').textContent =
       this.unitPrice.toLocaleString();
 
@@ -53,8 +55,8 @@ var Form = {
 
   /** @private 기존 신청 데이터로 폼 채우기 */
   populateExisting_: function(data) {
-    this.setWants(data.wantsExpense);
     if (data.wantsExpense && data.items && data.items.length > 0) {
+      // 먼저 항목을 추가한 뒤 setWants 호출 — setWants 내부의 자동 addItem 방지
       var self = this;
       data.items.forEach(function(item) {
         self.addItem();
@@ -64,7 +66,10 @@ var Form = {
         last.querySelector('.item-formula').value = item.formula || '';
         last.querySelector('.item-amount').value = item.amount || '';
       });
+      this.setWants(true);
       this.updateTotal();
+    } else {
+      this.setWants(data.wantsExpense);
     }
     if (data.note) {
       document.getElementById('note').value = data.note;

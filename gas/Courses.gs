@@ -54,6 +54,7 @@ function getCourses() {
     teacherContact: findCol(['교사연락처', '교사 연락처', '연락처']),
     dayOfWeek:      findCol(['수업요일']),
     students:       findCol(['수강인원', '수강 인원']),
+    extraAmount:    findCol(['추가금액', '추가 금액']),
     note:           findCol(['비고'])
   };
 
@@ -100,6 +101,15 @@ function getCourses() {
       course.students = 0;
       course.unavailable = true;
       course.unavailableReason = '수강인원 열을 찾을 수 없습니다';
+    }
+
+    // 추가금액 (한도 초과 허용 강좌)
+    if (CI.extraAmount !== -1) {
+      var rawExtra = row[CI.extraAmount];
+      var numExtra = Number(rawExtra);
+      course.extraAmount = (!isNaN(numExtra) && numExtra > 0) ? numExtra : 0;
+    } else {
+      course.extraAmount = 0;
     }
 
     courses.push(course);

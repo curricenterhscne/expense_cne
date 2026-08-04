@@ -117,10 +117,13 @@ var Print = {
     // 참고사항 — 수강인원 × 단가 동적 표시
     var unitPrice = config['인당단가'] || 20000;
     var students = p.students || 0;
-    var limit = students * unitPrice;
+    var baseBudget = students * unitPrice;
+    var extraAmount = (Form.courseData && Form.courseData.extraAmount) || 0;
+    var limit = baseBudget + extraAmount;
+    var limitDesc = '수강인원 ' + students + '명 × ' + unitPrice.toLocaleString() + '원';
+    if (extraAmount > 0) limitDesc += ' + 추가 ' + extraAmount.toLocaleString() + '원';
     document.getElementById('psRefLimit').textContent =
-      '운영비는 수업 교사(강사) 소속교로 교부 (수강인원 ' +
-      students + '명 × ' + unitPrice.toLocaleString() + '원 = ' +
+      '운영비는 수업 교사(강사) 소속교로 교부 (' + limitDesc + ' = ' +
       limit.toLocaleString() + '원)';
 
     // 푸터
