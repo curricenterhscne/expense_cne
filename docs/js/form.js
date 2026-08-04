@@ -238,6 +238,11 @@ var Form = {
 
   /** 제출 (확인 → API 호출) */
   submit: function() {
+    if (!App.authToken) {
+      alert('인증 정보가 없습니다. 본인 확인을 다시 진행해 주세요.');
+      App.reset();
+      return;
+    }
     if (!this.validate()) return;
 
     var items = this.wantsExpense ? this.getItems_() : [];
